@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Picker,
   Dimensions,
+  ScrollView,
 } from "react-native";
 
 import EditScreenInfo from "../components/EditScreenInfo";
@@ -53,39 +54,43 @@ export default function TabOneScreen() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <TextInput>Onii-chan</TextInput>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <TouchableWithoutFeedback onPress={() => console.log("Image tapped")}>
-        <Image
-          fadeDuration={200}
-          source={{
-            height: 300,
-            width: 200,
-            uri: "https://picsum.photos/200/300",
-          }}
+      <ScrollView>
+        <Text style={styles.title}>Tab One</Text>
+        <TextInput>The filename is TabOneScreen</TextInput>
+        <View
+          style={styles.separator}
+          lightColor="#eee"
+          darkColor="rgba(255,255,255,0.1)"
         />
-      </TouchableWithoutFeedback>
-      <Picker
-        selectedValue={selectedWebsite}
-        style={{ height: 50, width: 150 }}
-        onValueChange={(itemValue, itemIndex) => setSelectedWebsite(itemValue)}
-      >
-        <Picker.Item label="XVideos" value="xvideos" />
-        <Picker.Item label="JavBangers" value="javbangers" />
-      </Picker>
-      <Button title="Holler" onPress={hereToSayHello}>
-        Title
-      </Button>
-      <Button title="Refresh" onPress={StartCI}>
-        Title
-      </Button>
-      <Dropdown />
-      <EditScreenInfo path="/screens/TabOneScreen.tsx" />
+        <TouchableWithoutFeedback onPress={() => console.log("Image tapped")}>
+          <Image
+            fadeDuration={200}
+            source={{
+              height: 300,
+              width: 200,
+              uri: "https://picsum.photos/200/300",
+            }}
+          />
+        </TouchableWithoutFeedback>
+        <Picker
+          selectedValue={selectedWebsite}
+          style={{ height: 50, width: 150 }}
+          onValueChange={(itemValue, itemIndex) =>
+            setSelectedWebsite(itemValue)
+          }
+        >
+          <Picker.Item label="XVideos" value="xvideos" />
+          <Picker.Item label="JavBangers" value="javbangers" />
+        </Picker>
+        <Button title="Holler" onPress={hereToSayHello}>
+          Title
+        </Button>
+        <Button title="Refresh" onPress={StartCI}>
+          Title
+        </Button>
+        <Dropdown />
+        <EditScreenInfo path="/screens/TabOneScreen.tsx" />
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -17,14 +17,13 @@
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": ["**/*"],
-    "ios": {
-      "supportsTablet": true
-    },
     "web": {
       "favicon": "./assets/images/favicon.png"
     },
     "android": {
-      "package": "com.suvam0451.critstrike"
+      "package": "com.suvam0451.critstrike",
+      "versionCode": 1,
+      "useNextNotificationsApi": true
     }
   }
 }

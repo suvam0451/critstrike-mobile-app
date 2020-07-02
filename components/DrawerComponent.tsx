@@ -1,6 +1,10 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  DefaultTheme as NavigationDefaultTheme,
+  DarkTheme as NavigationDarkTheme,
+} from "@react-navigation/native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -8,6 +12,7 @@ import {
 } from "@react-navigation/drawer";
 import TabOneScreen from "../screens/TabOneScreen";
 import {
+  useTheme, // Also available from other package
   Avatar,
   Title,
   Caption,
@@ -16,8 +21,10 @@ import {
   TouchableRipple,
   Text,
   Switch,
+  DefaultTheme as PaperDefaultTheme,
+  DarkTheme as PaperDarkTheme,
 } from "react-native-paper";
-
+// import Icon from "react-native-vector-icons/Ionicons";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const _Drawer = createDrawerNavigator();
@@ -26,23 +33,17 @@ interface IDrawerProps {
   navigation: any;
 }
 
-const App = () => {
-  return (
-    <NavigationContainer>
-      <_Drawer.Navigator
-        drawerContent={(props) => <DrawerContent {...props} />}
-      >
-        <_Drawer.Screen name="Home" component={TabOneScreen} />
-      </_Drawer.Navigator>
-    </NavigationContainer>
-  );
-};
-
 // export default App;
 
 // Sidebar content
 export default function DrawerContent(props: IDrawerProps) {
+  // Used to check theme
+  const paperTheme = useTheme();
+
   const [isDarkTheme, setIsDarkTheme] = React.useState(false);
+  // const { signOut } = React.useContext(AuthContext);
+
+  // Toggles light/dark theme
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme);
   };
@@ -51,10 +52,25 @@ export default function DrawerContent(props: IDrawerProps) {
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View>
-          <View>
-            <View>
-              <Text accessibilityStates={[]}>This is a test</Text>
+          <View style={styles.drawerContent}>
+            {/* User icon and stuff */}
+            <View style={styles.userInfoSection}>
+              <View style={{ flexDirection: "row", marginTop: 15 }}>
+                <Avatar.Image
+                  source={{
+                    uri:
+                      "https://stikka.io/31-large_default/gitlab-logo-sticker.jpg",
+                  }}
+                  size={50}
+                  accessibilityStates={[]}
+                />
+                <View style={{ marginLeft: 8 }}>
+                  <Title style={styles.title}>Debashish Patra</Title>
+                  <Caption style={styles.caption}>@suvam0451</Caption>
+                </View>
+              </View>
             </View>
+            {/* Followers and following */}
             <View style={styles.row}>
               <View style={styles.section}>
                 <Paragraph style={[styles.paragraph, styles.caption]}>
@@ -72,12 +88,8 @@ export default function DrawerContent(props: IDrawerProps) {
           </View>
           <Drawer.Section style={styles.drawerSection} accessibilityStates={[]}>
             <DrawerItem
-              icon={(_props) => (
-                <Icon
-                  name="home-outline"
-                  color={_props.color}
-                  size={_props.size}
-                />
+              icon={({ color, size }) => (
+                <Icon name="home-outline" color={color} size={size} />
               )}
               label="Home"
               onPress={() => {
@@ -92,9 +104,9 @@ export default function DrawerContent(props: IDrawerProps) {
                   size={_props.size}
                 />
               )}
-              label="Manage Pipelines"
+              label="Laila"
               onPress={() => {
-                props.navigation.navigate("Home");
+                props.navigation.navigate("Laila");
               }}
             />
             <DrawerItem
@@ -105,15 +117,15 @@ export default function DrawerContent(props: IDrawerProps) {
                   size={_props.size}
                 />
               )}
-              label="History"
+              label="Welcome"
               onPress={() => {
-                props.navigation.navigate("Home");
+                props.navigation.navigate("Welcome");
               }}
             />
             <DrawerItem
               icon={(_props) => (
                 <Icon
-                  name="home-outline"
+                  name="account-check-outline"
                   color={_props.color}
                   size={_props.size}
                 />
@@ -124,7 +136,7 @@ export default function DrawerContent(props: IDrawerProps) {
               }}
             />
           </Drawer.Section>
-          {/*  */}
+          {/* Dark theme */}
           <Drawer.Section title="Preferences" accessibilityStates={[]}>
             <TouchableRipple
               accessibilityStates={[]}
@@ -133,7 +145,7 @@ export default function DrawerContent(props: IDrawerProps) {
               <View style={styles.preference}>
                 <Text accessibilityStates={[]}>Dark theme</Text>
                 <View pointerEvents="none">
-                  <Switch accessibilityStates={[]} value={isDarkTheme} />
+                  <Switch accessibilityStates={[]} value={paperTheme.dark} />
                 </View>
               </View>
             </TouchableRipple>
@@ -158,6 +170,11 @@ export default function DrawerContent(props: IDrawerProps) {
 
 // Thanks for open-source styling from Mr. Pradip (Youtube -- Pradip Debnath)
 const styles = StyleSheet.create({
+  bottomDrawerSection: {
+    marginBottom: 15,
+    borderTopColor: "#f4f4f4",
+    borderTopWidth: 1,
+  },
   caption: {
     fontSize: 14,
     lineHeight: 16,
@@ -165,13 +182,12 @@ const styles = StyleSheet.create({
   drawerContent: {
     flex: 1,
   },
-  bottomDrawerSection: {
-    marginBottom: 15,
-    borderTopColor: "#f4f4f4",
-    borderTopWidth: 1,
-  },
   drawerSection: {
     marginTop: 15,
+  },
+  paragraph: {
+    fontWeight: "bold",
+    marginRight: 3,
   },
   preference: {
     flexDirection: "row",
@@ -179,12 +195,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
-  paragraph: {
-    fontWeight: "bold",
-    marginRight: 3,
-  },
   row: {
     marginTop: 20,
+    marginLeft: 16,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -192,5 +205,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginRight: 15,
+  },
+  title: {
+    fontSize: 16,
+    marginTop: 0,
+    marginBottom: -4,
+    fontWeight: "bold",
+  },
+  userInfoSection: {
+    paddingLeft: 20,
   },
 });
