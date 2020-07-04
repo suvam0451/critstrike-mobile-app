@@ -17,9 +17,9 @@ BuildAPK:
   script:
     - yarn install --silent
     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
-    - yarn global add sharp-cli
+    - yarn global add sharp-cli expo-cli
     - npx expo-optimize
-    - yarn build:android
+    - expo build:android
 
 PublishAPK:
   stage: build
