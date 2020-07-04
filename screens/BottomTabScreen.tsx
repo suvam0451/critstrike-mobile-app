@@ -15,7 +15,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 /** Screens */
-import { NavigationScreens } from "./NavigationScreen";
+import { HomeScreenTabs } from "./NavigationScreen";
 
 /** Bottom yeet */
 export function BottomTabScreen() {
@@ -35,7 +35,7 @@ export function BottomTabScreen() {
     >
       <Tab.Screen
         name="Home"
-        component={NavigationScreens}
+        component={HomeScreenTabs}
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => (
@@ -45,7 +45,7 @@ export function BottomTabScreen() {
       />
       <Tab.Screen
         name="Details"
-        component={NavigationScreens}
+        component={HomeScreenTabs}
         options={{
           tabBarLabel: "Details",
           tabBarIcon: (props) => (

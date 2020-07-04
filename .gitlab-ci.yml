@@ -1,0 +1,35 @@
+image: node:latest
+
+cache: &global_cache
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+  policy: pull-push
+
+stages:
+  - build
+  - publish
+
+BuildAPK:
+  stage: build
+  cache:
+    <<: *global_cache
+  script:
+    - yarn install --silent
+    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
+    - yarn global add sharp-cli
+    - npx expo-optimize
+    - yarn build:android
+
+PublishAPK:
+  stage: build
+  cache:
+    <<: *global_cache
+  script:
+    - yarn install --silent
+    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
+    - yarn global add sharp-cli
+    - npx expo-optimize
+    - yarn build:android
+  only:
+    - tags

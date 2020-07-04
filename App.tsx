@@ -7,7 +7,7 @@ import React, {
   Reducer,
 } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { StyleSheet, View, Button } from "react-native";
+import { StyleSheet, View, Button, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-community/async-storage";
 import useCachedResources from "./hooks/useCachedResources";
@@ -27,7 +27,7 @@ import TabTwoScreen from "./screens/TabTwoScreen";
 import DrawerContent from "./components/DrawerComponent";
 import WelcomeScreen from "./screens/WelcomeScreen";
 /** */
-import { NavigationScreens } from "./screens/NavigationScreen";
+import { HomeScreenTabs } from "./screens/NavigationScreen";
 import { BottomTabScreen } from "./screens/BottomTabScreen";
 import {
   DefaultTheme as NavigationDefaultTheme,
@@ -37,6 +37,7 @@ import {
   DefaultTheme as PaperDefaultTheme,
   DarkTheme as PaperDarkTheme,
   Provider as PaperProvider,
+  Provider,
 } from "react-native-paper";
 
 import MyDrawer from "./components/DrawerComponent";
@@ -82,7 +83,7 @@ type loginAction =
   | { type: "RETRIEVE_TOKEN"; token: string }
   | { type: "LOGIN"; id: string; token: string }
   | { type: "LOGOUT" }
-  | { type: "REGISTER" };
+  | { type: "REGISTER"; token: string };
 
 type LoginReducer<S, A> = (prevState: S, action: A) => S;
 
@@ -150,19 +151,22 @@ export default function App(props: IAppProps) {
   const authContext = useMemo(
     () => ({
       signIn: async (userName: string, password: string) => {
+        console.log("Called!!!");
+
         let userToken = "reality";
-        setUserToken("fgk");
+        setUserToken("-CUasfvMePjsZzEgBHw-");
         setIsLoading(false);
 
         // try id/pass. Save if match.
-        if (userName == "user" && password == "pass") {
+        if (userName == "suvam0451" && password == "-CUasfvMePjsZzEgBHw-") {
           try {
-            userToken = "VALID_USERNAME";
+            userToken = "-CUasfvMePjsZzEgBHw-";
             await AsyncStorage.setItem("userToken", userToken);
           } catch (e) {
             console.log(e);
           }
         }
+        // Dispatch login action
         loginStateDispatch({
           type: "LOGIN",
           id: userName,
@@ -180,8 +184,15 @@ export default function App(props: IAppProps) {
         }
       },
       signUp: () => {
-        setUserToken("fgk");
+        setUserToken("-CUasfvMePjsZzEgBHw-");
         setIsLoading(false);
+      },
+      // Add API key
+      addAPIKey: () => {
+        console.log("AddAPIKey called...");
+      },
+      getAPIKey: () => {
+        console.log("GetAPIKey called...");
       },
     }),
     []
@@ -190,7 +201,9 @@ export default function App(props: IAppProps) {
   useEffect(() => {
     // After 1s, try acquiring token
     setTimeout(() => {
-      loginStateDispatch({ type: "RETRIEVE_TOKEN", token: "0" });
+      // Retrieve token will set isLoading false on completion
+      // Bypass login. Straight to home screen
+      loginStateDispatch({ type: "REGISTER", token: "-CUasfvMePjsZzEgBHw-" });
       setIsLoading(false);
     }, 1000);
     return () => {
@@ -198,102 +211,32 @@ export default function App(props: IAppProps) {
     };
   }, []);
 
-  interface INavigator {
-    navigation: any;
-  }
-  function HomeStackScreen(props: INavigator) {
-    return (
-      <HomeStack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#009387",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      >
-        <HomeStack.Screen
-          name="Home"
-          component={TabOneScreen}
-          options={{
-            title: "Overview",
-            headerLeft: () => (
-              <Icon.Button
-                name="ios-menu"
-                size={25}
-                backgroundColor="#009387"
-                onPress={() => props.navigation.openDrawer()}
-              ></Icon.Button>
-            ),
-          }}
-        ></HomeStack.Screen>
-      </HomeStack.Navigator>
-    );
-  }
-
-  function DetailsStackScreen(props: INavigator) {
-    return (
-      <DetailsStack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#009387",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      >
-        <DetailsStack.Screen
-          name="Tab1"
-          component={TabOneScreen}
-          options={{
-            title: "Details Screen",
-            headerLeft: () => (
-              <Icon.Button
-                name="ios-menu"
-                size={25}
-                backgroundColor="#009387"
-                onPress={() => props.navigation.openDrawer()}
-              ></Icon.Button>
-            ),
-          }}
-        ></DetailsStack.Screen>
-        <DetailsStack.Screen
-          name="Tab2"
-          component={TabTwoScreen}
-          options={{ title: "Go to tab 2" }}
-        ></DetailsStack.Screen>
-      </DetailsStack.Navigator>
-    );
-  }
-
   // Main return
-  if (!isLoadingComplete) {
-    return null;
+  if (loginState.isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   } else {
     return (
       // same theme has to be provided for both contetxs
-      // <AuthContext.Provider value=>
-
-      <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme}>
-          {/* Different page depending on userToken */}
-          {userToken !== null ? true : true}
-          <Drawer.Navigator
-            drawerContent={(props) => <DrawerContent {...props} />}
-          >
-            <Drawer.Screen name="Home" component={NavigationScreens} />
-            <Drawer.Screen name="Welcome" component={WelcomeScreen} />
-            <Drawer.Screen name="Others" component={TabOneScreen} />
-            <Drawer.Screen name="Laila2" component={HomeStackScreen} />
-            <Drawer.Screen name="Laila" component={BottomTabScreen} />
-          </Drawer.Navigator>
-        </NavigationContainer>
-      </PaperProvider>
-      // </AuthContext>
+      <AuthContext.Provider value={authContext}>
+        <PaperProvider theme={theme}>
+          <NavigationContainer theme={theme}>
+            {/* Different page depending on userToken */}
+            {userToken !== null ? true : true}
+            <Drawer.Navigator
+              drawerContent={(props) => <DrawerContent {...props} />}
+            >
+              <Drawer.Screen name="Home" component={HomeScreenTabs} />
+              <Drawer.Screen name="Welcome" component={WelcomeScreen} />
+              <Drawer.Screen name="Others" component={TabOneScreen} />
+              <Drawer.Screen name="Laila" component={BottomTabScreen} />
+            </Drawer.Navigator>
+          </NavigationContainer>
+        </PaperProvider>
+      </AuthContext.Provider>
     );
   }
 }

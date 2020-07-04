@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { View, StyleSheet, Button } from "react-native";
 import {
   NavigationContainer,
@@ -36,6 +36,8 @@ import {
   IPipelinesResponse,
   IPipeline,
 } from "../api/pipelines_gitlab";
+import { AuthContext } from "../components/Context";
+import AsyncStorage from "@react-native-community/async-storage";
 
 interface IGitlabProgressCardProps {
   projID: number;
@@ -52,6 +54,7 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   const [IsTag, setIsTag] = useState<boolean | undefined>(undefined);
   const [Ref, setRef] = useState("loading...");
 
+  const { getAPIKey, addAPIKey } = useContext(AuthContext);
   // Pipeline States
   const [RunningJobs, setRunningJobs] = useState<number>(0);
   const [SuccessJobs, setSuccessJobs] = useState<number>(0);
@@ -139,16 +142,23 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             setTotalJobs(total);
             setFailedJobs(numFailed);
             setSuccessJobs(numSucceed);
+
+            AsyncStorage.setItem("numCanceled", numCancelled.toString());
           });
           break;
         }
       }
-      // console.log(res.status);
     });
   }
 
   return (
     <View>
+      <Button
+        onPress={() => {
+          addAPIKey();
+        }}
+        title="Add API Key"
+      />
       <View style={styles.gitlabCard}>
         <View style={styles.gitlabCardDashboard}>
           <View style={styles.gitlabCardSectionA}>
