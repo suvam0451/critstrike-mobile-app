@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^10.0.0",
+    "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/hooks": "^2.6.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/bottom-tabs": "^5.6.1",
@@ -20,6 +21,7 @@
     "@react-navigation/material-bottom-tabs": "^5.2.12",
     "@react-navigation/native": "^5.6.1",
     "@react-navigation/stack": "^5.6.2",
+    "axios": "^0.19.2",
     "expo": "~38.0.4",
     "expo-asset": "~8.1.7",
     "expo-constants": "~9.1.1",

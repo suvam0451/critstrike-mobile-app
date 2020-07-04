@@ -50,7 +50,7 @@ export function BottomTabScreen() {
           tabBarLabel: "Details",
           tabBarIcon: (props) => (
             <MaterialCommunityIcons
-              name="ios-person"
+              name="battlenet"
               color={props.color}
               size={26}
             />

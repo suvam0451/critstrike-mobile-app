@@ -6,6 +6,7 @@ import {
 } from "@react-navigation/native";
 import { View, Text, Button } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { GitlabProgressCard } from "../components/PipelineCards";
 
 interface IProps {
   navigation: any;
@@ -47,6 +48,8 @@ const DetailsScreen = (props: IProps) => {
           props.navigation.push("Details");
         }}
       />
+      <GitlabProgressCard projID={18627416} />
+      <GitlabProgressCard projID={16273750} />
     </View>
   );
 };
@@ -63,7 +66,7 @@ export function NavigationScreens() {
         },
         headerTintColor: "#fff",
         headerTitleStyle: {
-          fontWeight: "light",
+          fontWeight: "normal",
         },
       }}
     >
@@ -86,6 +89,5 @@ export function NavigationScreens() {
         }}
       />
     </Stack.Navigator>
-    // </NavigationContainer>
   );
 }

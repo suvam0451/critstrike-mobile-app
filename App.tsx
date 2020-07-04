@@ -9,7 +9,7 @@ import React, {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet, View, Button } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-
+import AsyncStorage from "@react-native-community/async-storage";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
@@ -18,7 +18,10 @@ import TabOneScreen from "./screens/TabOneScreen";
 
 // Drawer
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import TabTwoScreen from "./screens/TabTwoScreen";
 import DrawerContent from "./components/DrawerComponent";
@@ -142,23 +145,39 @@ export default function App(props: IAppProps) {
   const DetailsStack = createStackNavigator();
   const Drawer = createDrawerNavigator();
 
+  const keystoreUpdateRequest = () => {};
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const authContext = useMemo(
     () => ({
-      signIn: (userName: string, password: string) => {
+      signIn: async (userName: string, password: string) => {
         let userToken = "reality";
         setUserToken("fgk");
         setIsLoading(false);
 
+        // try id/pass. Save if match.
+        if (userName == "user" && password == "pass") {
+          try {
+            userToken = "VALID_USERNAME";
+            await AsyncStorage.setItem("userToken", userToken);
+          } catch (e) {
+            console.log(e);
+          }
+        }
         loginStateDispatch({
           type: "LOGIN",
-          id: "suvam0451",
+          id: userName,
           token: userToken,
         });
       },
-      signOut: () => {
+      signOut: async () => {
         setUserToken(null);
         setIsLoading(false);
+
+        try {
+          await AsyncStorage.removeItem("userToken");
+        } catch (e) {
+          console.log(e);
+        }
       },
       signUp: () => {
         setUserToken("fgk");
@@ -169,7 +188,9 @@ export default function App(props: IAppProps) {
   );
 
   useEffect(() => {
+    // After 1s, try acquiring token
     setTimeout(() => {
+      loginStateDispatch({ type: "RETRIEVE_TOKEN", token: "0" });
       setIsLoading(false);
     }, 1000);
     return () => {
