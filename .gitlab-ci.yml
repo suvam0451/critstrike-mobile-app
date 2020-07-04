@@ -19,7 +19,7 @@ BuildAPK:
     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
     - yarn global add sharp-cli expo-cli
     - npx expo-optimize
-    - expo build:android
+    - npx expo build:android
 
 PublishAPK:
   stage: build
@@ -30,6 +30,6 @@ PublishAPK:
     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
     - yarn global add sharp-cli
     - npx expo-optimize
-    - yarn build:android
+    - npx expo build:android
   only:
     - tags
