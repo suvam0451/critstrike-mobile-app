@@ -30,6 +30,7 @@ PublishAPK:
     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
     - yarn global add sharp-cli
     - npx expo-optimize
-    - npx expo build:android
+    # - npx expo build:android
+    - npx expo publish --non-interactive
   only:
     - tags

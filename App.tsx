@@ -247,10 +247,10 @@ export default function App(props: IAppProps) {
             <Drawer.Navigator
               drawerContent={(props) => <DrawerContent {...props} />}
             >
-              <Drawer.Screen name="Home" component={HomeScreenTabs} />
+              <Drawer.Screen name="Home" component={BottomTabScreen} />
+              <Drawer.Screen name="Laila" component={BottomTabScreen} />
               <Drawer.Screen name="Welcome" component={WelcomeScreen} />
               <Drawer.Screen name="Others" component={TabOneScreen} />
-              <Drawer.Screen name="Laila" component={BottomTabScreen} />
             </Drawer.Navigator>
           </NavigationContainer>
         </PaperProvider>

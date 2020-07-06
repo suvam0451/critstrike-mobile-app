@@ -1,13 +1,4 @@
-export type Status =
-  | "created"
-  | "pending"
-  | "running"
-  | "failed"
-  | "canceled"
-  | "success"
-  | "unknown"
-  | "skipped"
-  | "manual";
+import { Status } from "./gitlab-types";
 
 export type GitlabCIPrimaryData = {
   status: Status;
@@ -17,3 +8,16 @@ export type GitlabCIPrimaryData = {
   isTag: boolean | undefined;
   projName: string;
 };
+
+export type JobCollectiveStatus = {
+  numSucceed: number;
+  numFailed: number;
+  numCanceled: number;
+  numPending: number;
+  numTotal: number;
+};
+
+export interface IBuildCard {
+  provider: "gitlab" | "azure" | "github";
+  id: number;
+}

@@ -16,15 +16,35 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 /** Screens */
 import { HomeScreenTabs } from "./NavigationScreen";
+import _ from "lodash";
 
-/** Bottom yeet */
+/** Screen with bottom google navigation. */
 export function BottomTabScreen() {
   const Tab = createMaterialBottomTabNavigator();
+  const NavScreens = [
+    {
+      name: "CI_Starred",
+      label: "Starred",
+      comp: HomeScreenTabs,
+      icon: "star",
+    },
+    {
+      name: "Home",
+      label: "Home",
+      comp: HomeScreenTabs,
+      icon: "bell",
+    },
+    {
+      name: "Details",
+      label: "Details",
+      comp: HomeScreenTabs,
+      icon: "battlenet",
+    },
+  ];
 
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarLabel: "Great",
         tabBarIcon: ({ color }) => (
           <MaterialCommunityIcons name="bell" color={color} size={24} />
         ),
@@ -33,30 +53,24 @@ export function BottomTabScreen() {
       labeled={false}
       barStyle={{ backgroundColor: "#694fad" }}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreenTabs}
-        options={{
-          tabBarLabel: "Home",
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="bell" color={color} size={24} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Details"
-        component={HomeScreenTabs}
-        options={{
-          tabBarLabel: "Details",
-          tabBarIcon: (props) => (
-            <MaterialCommunityIcons
-              name="battlenet"
-              color={props.color}
-              size={26}
-            />
-          ),
-        }}
-      />
+      {_.map(NavScreens, (ele) => {
+        return (
+          <Tab.Screen
+            name={ele.name}
+            component={HomeScreenTabs}
+            options={{
+              tabBarLabel: ele.label,
+              tabBarIcon: (props) => (
+                <MaterialCommunityIcons
+                  name={ele.icon}
+                  color={props.color}
+                  size={26}
+                />
+              ),
+            }}
+          />
+        );
+      })}
     </Tab.Navigator>
   );
 }

@@ -1,3 +1,14 @@
+export type Status =
+  | "created"
+  | "pending"
+  | "running"
+  | "failed"
+  | "canceled"
+  | "success"
+  | "unknown"
+  | "skipped"
+  | "manual";
+
 export interface IPipeline {
   id: number;
   sha: string;

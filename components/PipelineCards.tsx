@@ -35,7 +35,7 @@ import { IPipeline } from "../types/gitlab-types";
 import { AuthContext } from "../components/Context";
 import AsyncStorage from "@react-native-community/async-storage";
 
-import { GitlabCIPrimaryData } from "../types/app-types";
+import { GitlabCIPrimaryData, JobCollectiveStatus } from "../types/app-types";
 
 interface IGitlabProgressCardProps {
   projID: number;
@@ -60,14 +60,14 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   });
 
   const { getAPIKey, addAPIKey } = useContext(AuthContext);
-  // Pipeline States
   const [RunningJobs, setRunningJobs] = useState<number>(0);
-  const [SuccessJobs, setSuccessJobs] = useState<number>(0);
-  const [CanceledJobs, setCanceledJobs] = useState<number>(0);
-  const [FailedJobs, setFailedJobs] = useState<number>(0);
-  const [PendingJobs, setPendingJobs] = useState<number>(0);
-  const [TotalJobs, setTotalJobs] = useState<number>(0);
-  const [JobsText, setJobsText] = useState<number>(0);
+  const [JobStatuses, setJobStatuses] = useState<JobCollectiveStatus>({
+    numSucceed: 0,
+    numFailed: 0,
+    numCanceled: 0,
+    numPending: 0,
+    numTotal: 0,
+  });
 
   useEffect(() => {
     // Update everything, On page start
@@ -105,7 +105,7 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
         case 200: {
           let _data: IPipeline[] = res.data;
           // For pipelines screen
-          getPipeline(token, props.projID, _data[0].id, true).then((res) => {
+          getPipeline(token, props.projID, _data[0].id).then((res) => {
             let _projName = "unknown !!!";
 
             let ex = /.+\/(.+)\/\-(.*?)/;
@@ -155,11 +155,15 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
                 }
               }
             });
+            let pending = total - numCancelled - numFailed - numSucceed;
 
-            setCanceledJobs(numCancelled);
-            setTotalJobs(total);
-            setFailedJobs(numFailed);
-            setSuccessJobs(numSucceed);
+            setJobStatuses({
+              numSucceed: numSucceed,
+              numFailed: numFailed,
+              numCanceled: numCancelled,
+              numPending: pending,
+              numTotal: total,
+            });
 
             AsyncStorage.setItem("numCanceled", numCancelled.toString());
           });
@@ -197,7 +201,8 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
               <View style={styles.jobSection}>
                 <View style={styles.jobSectionA}>
                   <Caption style={styles.captionJobStatus}>
-                    {RunningJobs}/{SuccessJobs}/{FailedJobs} ({TotalJobs})
+                    {RunningJobs}/{JobStatuses.numSucceed}/
+                    {JobStatuses.numFailed} ({JobStatuses.numTotal})
                   </Caption>
                 </View>
                 <View>
@@ -234,7 +239,12 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             </View>
           </View>
         </View>
-        <View style={{ marginHorizontal: 8 }}>
+        <View
+          style={{
+            marginHorizontal: 8,
+            display: displayDetails ? "flex" : "none",
+          }}
+        >
           <View style={{ paddingLeft: 16 }}>
             <ValueField
               label="id"
@@ -368,9 +378,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 16,
     fontWeight: "900",
-  },
-  drawerContent: {
-    flex: 1,
   },
   drawerSection: {
     marginTop: 15,
