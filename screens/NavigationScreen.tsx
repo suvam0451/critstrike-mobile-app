@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 // import Screen from "./Screen";
 import {
   StackActionHelpers,
@@ -9,6 +9,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { GitlabProgressCard } from "../components/PipelineCards";
 import LoginScreen from "./LoginScreen";
 import _ from "lodash";
+import { ScrollView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-community/async-storage";
+import { PasswordStoreScreen } from "./APIKeysMenu";
 
 interface IProps {
   navigation: any;
@@ -18,8 +21,9 @@ interface IProps {
 export function HomeScreenTabs() {
   let screenArray = [
     { name: "Home", component: HomeScreen },
-    { name: "Details", component: DetailsScreen },
+    { name: "Details", component: BuildMonitorScreen },
     { name: "Login", component: LoginScreen },
+    { name: "Passwords", component: PasswordStoreScreen },
   ];
 
   const Stack = createStackNavigator();
@@ -71,13 +75,59 @@ const HomeScreen = (props: IProps) => {
           props.navigation.navigate("Login");
         }}
       />
+      <Button
+        title="Go to Passwords screen"
+        onPress={() => {
+          props.navigation.navigate("Passwords");
+        }}
+      />
     </View>
   );
 };
 
-const DetailsScreen = (props: IProps) => {
+interface IBuildCard {
+  provider: "gitlab" | "azure" | "github";
+  id: number;
+}
+
+interface IBuildMonitorProps {
+  navigation: any;
+  idArray: IBuildCard[];
+}
+
+const BuildMonitorScreen = (props: IBuildMonitorProps) => {
+  async function retrieveTags() {
+    let yeetos = await AsyncStorage.getItem("buildcards");
+  }
+
+  async function depositTags() {
+    await AsyncStorage.setItem("buildcards", JSON.stringify(idArray));
+  }
+
+  useEffect(() => {
+    retrieveTags();
+    return () => {
+      depositTags();
+    };
+  }, []);
+
+  let idArray: IBuildCard[] = [
+    {
+      provider: "gitlab",
+      id: 18627416,
+    },
+    {
+      provider: "gitlab",
+      id: 16273750,
+    },
+    {
+      provider: "gitlab",
+      id: 14775312,
+    },
+  ];
+
   return (
-    <View>
+    <ScrollView>
       <Text>Details Screen</Text>
       <Button
         title="Go to Home screen"
@@ -97,8 +147,20 @@ const DetailsScreen = (props: IProps) => {
           props.navigation.push("Details");
         }}
       />
-      <GitlabProgressCard projID={18627416} />
-      <GitlabProgressCard projID={16273750} />
-    </View>
+
+      {_.map(idArray, (obj) => {
+        switch (obj.provider) {
+          case "gitlab": {
+            return <GitlabProgressCard projID={obj.id} />;
+          }
+          case "github": {
+            return <GitlabProgressCard projID={obj.id} />;
+          }
+          case "azure": {
+            return <GitlabProgressCard projID={obj.id} />;
+          }
+        }
+      })}
+    </ScrollView>
   );
 };

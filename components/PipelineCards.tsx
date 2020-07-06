@@ -30,14 +30,12 @@ import { getPipelineJobs } from "../api/jobs_gitlab";
 // import Icon from "react-native-vector-icons/Ionicons";
 // import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/Ionicons";
-import {
-  getProjectPipelines,
-  getPipeline,
-  IPipelinesResponse,
-  IPipeline,
-} from "../api/pipelines_gitlab";
+import { getProjectPipelines, getPipeline } from "../api/pipelines_gitlab";
+import { IPipeline } from "../types/gitlab-types";
 import { AuthContext } from "../components/Context";
 import AsyncStorage from "@react-native-community/async-storage";
+
+import { GitlabCIPrimaryData } from "../types/app-types";
 
 interface IGitlabProgressCardProps {
   projID: number;
@@ -52,7 +50,14 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   const [StartingTime, setStartingTime] = useState("loading...");
   const [PipelineID, setPipelineID] = useState<number | undefined>(undefined);
   const [IsTag, setIsTag] = useState<boolean | undefined>(undefined);
-  const [Ref, setRef] = useState("loading...");
+  const [PrimaryData, setPrimaryData] = useState<GitlabCIPrimaryData>({
+    status: "unknown",
+    ref: "loading...",
+    pipelineID: undefined,
+    startingTime: "loading...",
+    isTag: undefined,
+    projName: "loading...",
+  });
 
   const { getAPIKey, addAPIKey } = useContext(AuthContext);
   // Pipeline States
@@ -65,7 +70,9 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   const [JobsText, setJobsText] = useState<number>(0);
 
   useEffect(() => {
-    console.log(props.projID);
+    // Update everything, On page start
+    ButtonPress();
+
     switch (Status) {
       case "success": {
         setStatusColor("green");
@@ -98,12 +105,23 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
         case 200: {
           let _data: IPipeline[] = res.data;
           // For pipelines screen
-          getPipeline(token, props.projID, _data[0].id).then((res) => {
-            setStatus(res.data.status);
-            setRef(res.data.ref);
-            setPipelineID(res.data.id);
-            setStartingTime(res.data.created_at);
-            setIsTag(res.data.tag);
+          getPipeline(token, props.projID, _data[0].id, true).then((res) => {
+            let _projName = "unknown !!!";
+
+            let ex = /.+\/(.+)\/\-(.*?)/;
+            if (ex.test(res.web_url)) {
+              _projName = res.web_url.match(ex)![1];
+            }
+
+            res.web_url;
+            setPrimaryData({
+              status: res.status,
+              ref: res.ref,
+              pipelineID: res.id,
+              startingTime: res.created_at,
+              isTag: res.tag,
+              projName: _projName,
+            });
           });
 
           getPipelineJobs(token, props.projID, _data[0].id).then((res) => {
@@ -153,12 +171,6 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
 
   return (
     <View>
-      <Button
-        onPress={() => {
-          addAPIKey();
-        }}
-        title="Add API Key"
-      />
       <View style={styles.gitlabCard}>
         <View style={styles.gitlabCardDashboard}>
           <View style={styles.gitlabCardSectionA}>
@@ -174,12 +186,12 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             </View>
           </View>
           <View style={styles.gitlabCardSectionB}>
-            <View style={{ marginLeft: 8 }}>
-              <Title style={styles.title}>Debashish Patra</Title>
+            <View style={{ marginLeft: 0 }}>
+              <Title style={styles.title}>{PrimaryData.projName}</Title>
               <Caption style={[styles.caption, styles.bottomDrawerSection]}>
                 Status:{" "}
                 <Text accessibilityStates={[]} style={{ color: StatusColor }}>
-                  {Status}
+                  {PrimaryData.status}
                 </Text>
               </Caption>
               <View style={styles.jobSection}>
@@ -222,14 +234,14 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             </View>
           </View>
         </View>
-        <View style={styles.gitlabCardDetails}>
-          <View style={styles.textFields}>
+        <View style={{ marginHorizontal: 8 }}>
+          <View style={{ paddingLeft: 16 }}>
             <ValueField
               label="id"
               value={PipelineID ? PipelineID : "loading..."}
               maxwidth={300}
             />
-            <ValueField label="ref" value={Ref} maxwidth={300} />
+            <ValueField label="ref" value={PrimaryData.ref} maxwidth={300} />
             <ValueField
               label="started_at"
               value="2020-06-27T22:35:12.803Z"
@@ -252,10 +264,10 @@ function ValueField(props: IValueFieldProps) {
   return (
     <View style={{ maxWidth: props.maxwidth }}>
       <View style={styles.field}>
-        <Text accessibilityStates={[]} style={styles.fieldLabel}>
+        <Text accessibilityStates={[]} style={{ flex: 1, fontWeight: "bold" }}>
           {props.label}:{" "}
         </Text>
-        <Text accessibilityStates={[]} style={styles.fieldValue}>
+        <Text accessibilityStates={[]} style={{ flex: 1 }}>
           {props.value}
         </Text>
       </View>
@@ -301,42 +313,12 @@ const styles = StyleSheet.create({
     marginRight: 8,
     justifyContent: "flex-end",
   },
-  projectIDSection: {
-    marginRight: 0,
-  },
-  gitlabCardDetails: {
-    marginHorizontal: 8,
-  },
-  textFields: {
-    paddingLeft: 16,
-  },
   field: {
     display: "flex",
     height: 20,
     flexDirection: "row",
   },
-  fieldLabel: {
-    flex: 1,
-    fontWeight: "bold",
-  },
-  fieldValue: {
-    flex: 1,
-  },
 
-  detailsButtonA: {
-    width: 42,
-    marginLeft: -32,
-    marginBottom: 15,
-    borderTopColor: "#f4f4f4",
-    borderTopWidth: 1,
-  },
-  detailsButtonB: {
-    width: 42,
-    marginLeft: -32,
-    marginBottom: 15,
-    borderTopColor: "#f4f4f4",
-    borderTopWidth: 1,
-  },
   gitlabCardSectionA: {
     width: 80,
     marginLeft: 12,
@@ -349,13 +331,22 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
+    alignContent: "center",
     backgroundColor: "#f46a25",
     paddingLeft: 36,
-    paddingRight: 0,
+    paddingVertical: 2,
   },
   gitlabCardText: {
     alignContent: "center",
     textAlign: "center",
+  },
+  detailsButtonA: {
+    width: 42,
+    marginLeft: -32,
+  },
+  detailsButtonB: {
+    width: 42,
+    marginLeft: -32,
   },
   bottomDrawerSection: {
     marginBottom: 20,
@@ -369,12 +360,12 @@ const styles = StyleSheet.create({
   },
   captionJobStatus: {
     // inside jobSectionB
-    fontSize: 20,
+    fontSize: 18,
     lineHeight: 20,
     fontWeight: "bold",
   },
   captionBottom: {
-    fontSize: 14,
+    fontSize: 10,
     lineHeight: 16,
     fontWeight: "900",
   },

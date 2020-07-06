@@ -198,10 +198,28 @@ export default function App(props: IAppProps) {
     []
   );
 
+  async function retrieval() {
+    let username = await AsyncStorage.getItem("username");
+    let userid = await AsyncStorage.getItem("userid");
+  }
   useEffect(() => {
     // After 1s, try acquiring token
     setTimeout(() => {
       // Retrieve token will set isLoading false on completion
+      let keyStoreState = [
+        {
+          provider: "gitlab",
+          type: "admin",
+          profile: "gitlabmain",
+          apikey: "-CUasfvMePjsZzEgBHw-",
+        },
+        {
+          provider: "gitlab",
+          type: "ci",
+          profile: "gitlabCI",
+          apikey: "-CUasfvMePjsZzEgBHw-",
+        },
+      ];
       // Bypass login. Straight to home screen
       loginStateDispatch({ type: "REGISTER", token: "-CUasfvMePjsZzEgBHw-" });
       setIsLoading(false);

@@ -37,12 +37,6 @@ import { getPipelineJobs } from "../api/jobs_gitlab";
 // import Icon from "react-native-vector-icons/Ionicons";
 // import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/Ionicons";
-import {
-  getProjectPipelines,
-  getPipeline,
-  IPipelinesResponse,
-  IPipeline,
-} from "../api/pipelines_gitlab";
 import { AuthContext } from "../components/Context";
 // import { StatusBar } from "expo-status-bar";
 import * as Animatable from "react-native-animatable";
