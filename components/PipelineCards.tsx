@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { View, StyleSheet, Button, Image, Linking } from "react-native";
+import * as Notifications from "expo-notifications";
 import {
   NavigationContainer,
   DefaultTheme as NavigationDefaultTheme,
@@ -338,7 +339,11 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
         >
           {/* Logo image */}
           <View style={styles.gitlabCardSectionA}>
-            <Avatar.Image source={AvatarImage} size={64} />
+            <Avatar.Image
+              source={AvatarImage}
+              size={64}
+              accessibilityStates={[]}
+            />
           </View>
           {/* Dashboard, name, status */}
           <View style={styles.gitlabCardSectionB}>

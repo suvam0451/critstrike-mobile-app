@@ -23,7 +23,7 @@
     "android": {
       "package": "com.suvam0451.critstrike",
       "versionCode": 1,
-      "useNextNotificationsApi": false
+      "useNextNotificationsApi": true
     }
   }
 }
