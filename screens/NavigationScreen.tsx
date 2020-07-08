@@ -121,18 +121,38 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
     {
       provider: "gitlab",
       id: 18627416,
+      token: "-CUasfvMePjsZzEgBHw-",
     },
     {
       provider: "gitlab",
       id: 16273750,
+      token: "-CUasfvMePjsZzEgBHw-",
     },
     {
       provider: "gitlab",
       id: 14775312,
+      token: "-CUasfvMePjsZzEgBHw-",
     },
     {
       provider: "gitlab",
       id: 19639484,
+      token: "-CUasfvMePjsZzEgBHw-",
+    },
+    {
+      provider: "azure",
+      organization: "suvam0451",
+      project: "ReEncoding",
+      token: "c4cipj4hasom3wrhrlkujsqo7ixtqslocrg72rs55mwwnicnb37q",
+    },
+    {
+      provider: "github",
+      id: 19639484,
+      token: "-CUasfvMePjsZzEgBHw-",
+    },
+    {
+      provider: "github",
+      id: 19639484,
+      token: "-CUasfvMePjsZzEgBHw-",
     },
   ];
 
@@ -140,14 +160,12 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
 
   return (
     <View>
-      <Text style={{ paddingLeft: 10, fontSize: 18, marginBottom: 0 }}>
-        Pull to refresh all...
-      </Text>
-
       <FlatList
         data={idArray}
         renderItem={(ele) => {
-          return <GitlabProgressCard projID={ele.item.id} />;
+          return (
+            <GitlabProgressCard data={ele.item} provider={ele.item.provider} />
+          );
         }}
         keyExtractor={(i, k) => {
           return k.toString();

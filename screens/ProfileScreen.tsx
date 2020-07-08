@@ -33,6 +33,8 @@ import { IBuildCard } from "../types/app-types";
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-community/async-storage";
 
+import {listBuilds} from "../api/pipelines_azure"
+
 export function ProfileScreen() {
   const [Dashboard, setDashboard] = useState({
     running: 0,

@@ -57,7 +57,7 @@ export async function getPipeline(
   });
 }
 
-export async function getPipelineVariables(): Promise<void> {
+export async function getPipelineVariables(token: string, pipelineID: number, projID: number): Promise<void> {
   let inst = getGitlabInstance(token);
   inst.defaults.url = `/projects/${projID}/pipelines/${pipelineID}/variables`;
 
