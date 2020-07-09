@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
+import { Buffer } from "buffer";
 
 export type Status =
   | "created"
@@ -33,7 +34,7 @@ export type Method =
   | "UNLINK"
   | undefined;
 
-/** Creates and returnes an axios object. */
+/** Creates and returnes an axios object --> https://gitlab.com/api/v4/  */
 export function getGitlabInstance(
   token: string,
   method: Method = "get"
@@ -57,7 +58,7 @@ export function getAzureInstance(
   // const username = "suvam0451",
   // password = token;
   // let _token = Buffer.from(`${username}:${password}`, "utf8").toString("base64");
-  let _token = Buffer.from(`:${token}`, "utf8").toString("base64");
+  const _token = Buffer.from(`:${token}`, "utf8").toString("base64");
   return axios.create({
     method: method,
     baseURL: `https://dev.azure.com/`,

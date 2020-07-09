@@ -57,7 +57,33 @@ export async function getPipeline(
   });
 }
 
-export async function getPipelineVariables(token: string, pipelineID: number, projID: number): Promise<void> {
+// curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipeline?ref=master"
+
+/** Restarts a pipeline
+ * e.g.- { ref: "master", variables: [{ 'key' => 'UPLOAD_TO_S3', 'B' => 'true' }] }
+ */
+export async function restartPipeline(
+  token: string,
+  projId: number | string,
+  data: Object = { ref: "master" }
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getGitlabInstance(token, "POST")
+      .post(`projects/${projId}/pipeline`, data)
+      .then(
+        (res) => console.log(res),
+        (err) => console.log(err)
+      );
+  });
+}
+
+restartPipeline("-CUasfvMePjsZzEgBHw-", 19639484);
+
+export async function getPipelineVariables(
+  token: string,
+  pipelineID: number,
+  projID: number
+): Promise<void> {
   let inst = getGitlabInstance(token);
   inst.defaults.url = `/projects/${projID}/pipelines/${pipelineID}/variables`;
 

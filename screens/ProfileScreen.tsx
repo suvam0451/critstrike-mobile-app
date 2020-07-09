@@ -10,6 +10,7 @@ import {
   DrawerContentScrollView,
   DrawerItem,
 } from "@react-navigation/drawer";
+import { Divider } from "react-native-paper";
 import TabOneScreen from "../screens/TabOneScreen";
 import {
   useTheme, // Also available from other package
@@ -32,8 +33,8 @@ import { IBuildCard } from "../types/app-types";
 
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-community/async-storage";
-
-import {listBuilds} from "../api/pipelines_azure"
+import KeyValuePairField from "../components/KeyValuePairField";
+import { listBuilds } from "../api/pipelines_azure";
 
 export function ProfileScreen() {
   const [Dashboard, setDashboard] = useState({
@@ -90,6 +91,7 @@ export function ProfileScreen() {
               uri: "https://stikka.io/31-large_default/gitlab-logo-sticker.jpg",
             }}
             size={64}
+            accessibilityStates={[]}
           />
           <View style={{ marginLeft: 20 }}>
             <Title style={[styles.title, { marginTop: 15, marginBottom: 5 }]}>
@@ -103,11 +105,21 @@ export function ProfileScreen() {
       <View style={styles.userInfoSection}>
         <View style={styles.row}>
           <MaterialIcon name="map-marker-radius" color="#777777" size={20} />
-          <Text style={{ color: "#777777", marginLeft: 20 }}>Kolkata, </Text>
+          <Text
+            style={{ color: "#777777", marginLeft: 20 }}
+            accessibilityStates={[]}
+          >
+            Kolkata,{" "}
+          </Text>
         </View>
         <View style={styles.row}>
           <MaterialIcon name="map-marker-radius" color="#777777" size={20} />
-          <Text style={{ color: "#777777", marginLeft: 20 }}>Kolkata, </Text>
+          <Text
+            style={{ color: "#777777", marginLeft: 20 }}
+            accessibilityStates={[]}
+          >
+            Kolkata,{" "}
+          </Text>
         </View>
       </View>
 
@@ -131,14 +143,19 @@ export function ProfileScreen() {
         </View>
       </View>
 
+      <KeyValuePairField CardIdx={5} paramIdx={0} />
+      <Divider accessibilityStates={[]} />
+      <KeyValuePairField CardIdx={5} paramIdx={1} />
       {/* Screen navigations */}
       <View style={styles.menuWrapper}>
         {_.map(_nav, (ele) => {
           return (
-            <TouchableRipple onPress={() => {}}>
+            <TouchableRipple onPress={() => {}} accessibilityStates={[]}>
               <View style={styles.menuItem}>
                 <MaterialIcon name={ele.icon} color="#FF6347" size={25} />
-                <Text style={styles.menuItemText}>{ele.text}</Text>
+                <Text style={styles.menuItemText} accessibilityStates={[]}>
+                  {ele.text}
+                </Text>
               </View>
             </TouchableRipple>
           );

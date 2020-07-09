@@ -9,6 +9,7 @@ export type GitlabCIPrimaryData = {
   projName: string;
   projID: string | number;
   external_link: URL | null;
+  duration?: string;
 };
 
 export type JobCollectiveStatus = {
@@ -20,9 +21,34 @@ export type JobCollectiveStatus = {
 };
 
 export type IBuildCard =
-  | { provider: "gitlab"; id: number; token: string }
-  | { provider: "azure"; organization: string; project: string; token: string }
-  | { provider: "github"; id: number; token: string };
+  | {
+      provider: "gitlab";
+      uid: number;
+      id: number;
+      token: string;
+      vars?: IVariable[];
+    }
+  | { provider: "azure"; uid: number; params: AzureParams; vars?: IVariable[] }
+  | {
+      provider: "github";
+      uid: number;
+      id: number;
+      token: string;
+      vars?: IVariable[];
+    };
+
+export type AzureParams = {
+  organization: string;
+  project: string;
+  token: string;
+};
+
+export type IVariable = {
+  label: string;
+  value: string;
+  currentValue?: string;
+  IEnum?: string[];
+};
 
 /** Return type for artifacts */
 export type IArtifact = {

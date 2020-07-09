@@ -44,11 +44,11 @@ export function BottomTabScreen() {
 
   return (
     <Tab.Navigator
-      screenOptions={{
-        tabBarIcon: ({ color }) => (
-          <MaterialCommunityIcons name="bell" color={color} size={24} />
-        ),
-      }}
+      // screenOptions={{
+      //   tabBarIcon: ({ color }) => (
+      //     <MaterialCommunityIcons name="bell" color={color} size={24} />
+      //   ),
+      // }}
       initialRouteName="Home"
       labeled={false}
       barStyle={{ backgroundColor: "#694fad" }}
@@ -58,6 +58,7 @@ export function BottomTabScreen() {
           <Tab.Screen
             name={ele.name}
             component={HomeScreenTabs}
+            key={ele.label}
             options={{
               tabBarLabel: ele.label,
               tabBarIcon: (props) => (

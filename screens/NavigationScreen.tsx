@@ -103,10 +103,12 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
   const [IsLoading, setIsLoading] = useState(false);
 
   async function retrieveTags() {
+    console.log("!!! STATE READ ALERT !!!");
     let yeetos = await AsyncStorage.getItem("buildcards");
   }
 
   async function depositTags() {
+    console.log("!!! STATE SAVE ALERT !!!");
     await AsyncStorage.setItem("buildcards", JSON.stringify(idArray));
   }
 
@@ -119,37 +121,66 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
 
   let idArray: IBuildCard[] = [
     {
+      uid: 0,
       provider: "gitlab",
       id: 18627416,
       token: "-CUasfvMePjsZzEgBHw-",
     },
     {
+      uid: 1,
       provider: "gitlab",
       id: 16273750,
       token: "-CUasfvMePjsZzEgBHw-",
     },
     {
+      uid: 2,
       provider: "gitlab",
       id: 14775312,
       token: "-CUasfvMePjsZzEgBHw-",
     },
     {
+      uid: 3,
       provider: "gitlab",
       id: 19639484,
       token: "-CUasfvMePjsZzEgBHw-",
     },
     {
+      uid: 4,
       provider: "azure",
-      organization: "suvam0451",
-      project: "ReEncoding",
-      token: "c4cipj4hasom3wrhrlkujsqo7ixtqslocrg72rs55mwwnicnb37q",
+      params: {
+        organization: "suvam0451",
+        project: "ReEncoding",
+        token: "c4cipj4hasom3wrhrlkujsqo7ixtqslocrg72rs55mwwnicnb37q",
+      },
     },
     {
+      uid: 5,
+      provider: "azure",
+      params: {
+        organization: "suvam0451",
+        project: "ReEncoding",
+        token: "c4cipj4hasom3wrhrlkujsqo7ixtqslocrg72rs55mwwnicnb37q",
+      },
+      vars: [
+        {
+          label: "OP_TAG",
+          value: "drivekit_folder",
+          IEnum: ["drivekit_folder", "drivekit_file"],
+        },
+        {
+          label: "GDRIVE_FOLDER",
+          value: "1lIxfsC_DJ41U5Pjf0OnvmIE8rGu0f3xv",
+        },
+      ],
+    },
+    {
+      uid: 6,
       provider: "github",
       id: 19639484,
       token: "-CUasfvMePjsZzEgBHw-",
     },
     {
+      uid: 7,
       provider: "github",
       id: 19639484,
       token: "-CUasfvMePjsZzEgBHw-",
