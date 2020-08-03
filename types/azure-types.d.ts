@@ -80,7 +80,7 @@ export type AzureBuildList = {
       sourceBranch: string;
       url: URL; // To build
       definition: {
-        id: number; // Different from id above
+        id: number; // Different from id above. Used to invoke same pipeline with different parameters
         name: string; // Project name
         url: URL;
         uri: string;

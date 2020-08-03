@@ -14,6 +14,8 @@ import AsyncStorage from "@react-native-community/async-storage";
 import { PasswordStoreScreen } from "./APIKeysMenu";
 import { ProfileScreen } from "./ProfileScreen";
 import { IBuildCard } from "../types/app-types";
+import { PickerModal } from "../components/PickerModal";
+import { GitlabActiveProfileModal } from "../components/ModalLibrary";
 
 interface IProps {
   navigation: any;
@@ -61,9 +63,14 @@ export function HomeScreenTabs() {
 
 // PAGE COMPONENTS
 const HomeScreen = (props: IProps) => {
+  const [ModalVisibility, setModalVisibility] = useState(false);
+
   return (
     <View>
-      <Text>Welcome screen</Text>
+      <GitlabActiveProfileModal
+        isVisible={ModalVisibility}
+        setIsVisible={setModalVisibility}
+      />
       <Button
         title="View all pipelines"
         onPress={() => {
@@ -89,6 +96,12 @@ const HomeScreen = (props: IProps) => {
           props.navigation.navigate("Profile");
         }}
       />
+      <Button
+        title="Show modal"
+        onPress={() => {
+          setModalVisibility(true);
+        }}
+      />
     </View>
   );
 };
@@ -103,12 +116,10 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
   const [IsLoading, setIsLoading] = useState(false);
 
   async function retrieveTags() {
-    console.log("!!! STATE READ ALERT !!!");
     let yeetos = await AsyncStorage.getItem("buildcards");
   }
 
   async function depositTags() {
-    console.log("!!! STATE SAVE ALERT !!!");
     await AsyncStorage.setItem("buildcards", JSON.stringify(idArray));
   }
 

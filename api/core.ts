@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
 import { Buffer } from "buffer";
+import AsyncStorage from "@react-native-community/async-storage";
 
 export type Status =
   | "created"
@@ -34,6 +35,26 @@ export type Method =
   | "UNLINK"
   | undefined;
 
+/**
+ * Creates and returns an axios object --> https://gitlab.com/api/v4/
+ *  Uses GITLAB_ACTIVE_TOKEN from AsyncStorage
+ */
+export async function getActiveGitlabInsatnce(
+  method: Method = "get"
+): Promise<AxiosInstance> {
+  const token: string | null = await AsyncStorage.getItem(
+    "GITLAB_ACTIVE_TOKEN"
+  );
+  if (token === null) {
+    return new Promise<AxiosInstance>((resolve, reject) => {
+      reject(Error("GITLAB_ACTIVE_TOKEN not found in AsyncStorage"));
+    });
+  } else {
+    return new Promise<AxiosInstance>((resolve, reject) => {
+      resolve(getGitlabInstance(token, method));
+    });
+  }
+}
 /** Creates and returnes an axios object --> https://gitlab.com/api/v4/  */
 export function getGitlabInstance(
   token: string,

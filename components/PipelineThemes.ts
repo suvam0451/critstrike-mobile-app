@@ -81,11 +81,9 @@ export function getStatusColor(provider: string, baseStatus: string): string {
           return "green";
         }
       }
-      console.log("azure detected...");
       return "grey";
     }
     case "github": {
-      console.log("github detected...");
       return "grey";
     }
     default: {

@@ -87,6 +87,13 @@ type loginAction =
 
 type LoginReducer<S, A> = (prevState: S, action: A) => S;
 
+// Use Reactotron
+if (__DEV__) {
+  import("./ReactotronConfig").then(() => {
+    console.log("Reactotron Configured");
+  });
+}
+
 export default function App(props: IAppProps) {
   const loginReducer = (prevState: ILoginState, action: loginAction) => {
     switch (action.type) {

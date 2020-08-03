@@ -34,6 +34,8 @@ import {
 } from "react-native-paper";
 import { Status } from "../api/core";
 import { getPipelineJobs } from "../api/jobs_gitlab";
+import { GetPipelineJobs, GetPipelineInfo } from "../modules/gitlab_pipelines";
+import { GetBuilds, CountJobStatuses } from "../modules/azure_pipelines";
 import _ from "lodash";
 // import Icon from "react-native-vector-icons/Ionicons";
 // import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -58,6 +60,7 @@ import {
   basePipelineCardPrimaryData,
   baseJobStatuses,
 } from "../utils/variables";
+import { pipeline } from "form-data";
 
 interface IGitlabProgressCardProps {
   data: IBuildCard;
@@ -168,124 +171,41 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
     }
   }
   /** Do stuff!!! */
-  function ButtonPress(e: any) {
+  async function ButtonPress(e: any) {
     switch (props.data.provider) {
       case "gitlab": {
-        let { id, token } = props.data;
-        Gitlab.getProjectPipelines(token, id).then((res) => {
-          switch (res.status) {
-            case 200: {
-              let _data: IPipeline[] = res.data;
-              // For pipelines screen
-              Gitlab.getPipeline(token, id, _data[0].id).then((res) => {
-                let _projName = "unknown !!!";
+        let { id: project_id, token } = props.data;
 
-                let ex = /.+\/(.+)\/\-(.*?)/;
-                if (ex.test(res.web_url)) {
-                  _projName = res.web_url.match(ex)![1];
-                }
+        const { data, status } = await Gitlab.getProjectPipelines(
+          token,
+          project_id
+        );
+        if (status == 200) {
+          // Get pipeline status and jobs for the most recent pipeline_id
+          let _pipeline = await GetPipelineInfo(token, project_id, data[0].id);
+          let _jobs = await GetPipelineJobs(token, project_id, data[0].id);
 
-                const { ref, status, created_at, tag, duration } = res;
-                // For color update
-                setStatus(status);
-                // For data state update
-                setPrimaryData({
-                  status: status,
-                  ref: ref,
-                  pipelineID: res.id,
-                  startingTime: created_at,
-                  isTag: tag,
-                  projName: _projName,
-                  projID: id,
-                  external_link: new URL("okay"),
-                  duration: duration ? duration.toString() : "unknown",
-                });
-              });
-
-              getPipelineJobs(token, id, _data[0].id).then((res) => {
-                let numSucceed = 0;
-                let numFailed = 0;
-                let numCancelled = 0;
-                let numPending = 0;
-                let total = res.length;
-                let smith: string[] = [];
-                res.forEach((job) => {
-                  smith.push(job.name);
-                  switch (job.status) {
-                    case "failed": {
-                      numFailed++;
-                      break;
-                    }
-                    case "success": {
-                      numSucceed++;
-                      break;
-                    }
-                    case "pending": {
-                      numPending++;
-                      break;
-                    }
-                    case "canceled": {
-                      numCancelled++;
-                    }
-                    default: {
-                      break;
-                    }
-                  }
-                });
-                let pending = total - numCancelled - numFailed - numSucceed;
-
-                setJobStatuses({
-                  numSucceed: numSucceed,
-                  numFailed: numFailed,
-                  numCanceled: numCancelled,
-                  numPending: pending,
-                  numTotal: total,
-                });
-
-                AsyncStorage.setItem("numCanceled", numCancelled.toString());
-              });
-              break;
-            }
-          }
-        });
+          // Update state
+          setPrimaryData({ ..._pipeline });
+          setJobStatuses({ ..._jobs });
+          AsyncStorage.setItem("numCanceled", _jobs.numCanceled.toString());
+        }
         break;
       }
       case "azure": {
         const { params } = props.data;
-        Azure.listBuilds(params).then(
-          (res) => {
-            const { sourceBranch, status, startTime, id } = res.value[0];
+        let _builds = await GetBuilds(params);
 
-            // This ref is used for a restart
-            setRestartRef(res.value[0].definition.id);
-            setStatus(res.value[0].status);
-            setPrimaryData({
-              ref: sourceBranch,
-              projName: res.value[0].repository.name,
-              status: status === "completed" ? "success" : "failed",
-              startingTime: startTime,
-              pipelineID: id,
-              isTag: false,
-              projID: "N/A",
-              external_link: res.value[0]._links.web.href,
-            });
+        let __builds = await Azure.listBuilds(params);
+        const { id, definition } = __builds.value[0];
 
-            Azure.getTimeline(params, id).then((res) => {
-              /** This query gives us approximate started jobs */
-              let A = res.records.filter((ele) => ele.type == "Phase");
-              /** This query gives up approximate finished jobs */
-              let B = res.records.filter((ele) => ele.name == "Finalize Job");
+        // This ref is used for a restart
+        setRestartRef(definition.id);
+        setStatus(_builds.status);
+        setPrimaryData({ ..._builds });
 
-              setJobStatuses({
-                ...baseJobStatuses,
-                numSucceed: B.length,
-                numFailed: A.length - B.length,
-                numTotal: A.length,
-              });
-            });
-          },
-          (err) => console.log(err)
-        );
+        let _timeline = await Azure.getTimeline(params, id);
+        setJobStatuses(CountJobStatuses(_timeline));
         break;
       }
     }

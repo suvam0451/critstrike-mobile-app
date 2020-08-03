@@ -7,14 +7,15 @@ import { IPipelineJobsData, IPipelineJobsHeader } from "../types/gitlab-types";
 export async function getJob(
   token: string,
   projID: string | number,
-  jobID: number
+  jobID: number,
+  debug?: boolean
 ) {
   let inst = getGitlabInstance(token);
   inst.defaults.url = `/projects/${projID}/pipelines/${jobID}`;
 
   inst.get(inst.defaults.url).then((res) => {
     let _data: IPipelineJobsData = res.data;
-    console.log(res);
+    debug ? console.log(_data) : true;
     return res;
   });
 }
@@ -23,14 +24,15 @@ export async function getJob(
 export async function getPipelines(
   token: string,
   projID: string | number,
-  jobID: number
+  jobID: number,
+  debug?: boolean
 ) {
   let inst = getGitlabInstance(token);
   inst.defaults.url = `/projects/${projID}/pipelines}`;
 
   inst.get(inst.defaults.url).then((res) => {
     let _data: IPipelineJobsData = res.data;
-    console.log(res);
+    debug ? console.log(_data) : true;
     return res;
   });
 }
