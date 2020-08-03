@@ -148,9 +148,13 @@ export function ProfileScreen() {
       <KeyValuePairField CardIdx={5} paramIdx={1} />
       {/* Screen navigations */}
       <View style={styles.menuWrapper}>
-        {_.map(_nav, (ele) => {
+        {_nav.map((ele, i) => {
           return (
-            <TouchableRipple onPress={() => {}} accessibilityStates={[]}>
+            <TouchableRipple
+              onPress={() => {}}
+              accessibilityStates={[]}
+              key={i}
+            >
               <View style={styles.menuItem}>
                 <MaterialIcon name={ele.icon} color="#FF6347" size={25} />
                 <Text style={styles.menuItemText} accessibilityStates={[]}>

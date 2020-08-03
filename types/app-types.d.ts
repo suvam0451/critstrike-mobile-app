@@ -56,3 +56,21 @@ export type IArtifact = {
   link: URL;
   size: string;
 };
+
+/** Type for the accessible buttons on the
+ *  dropdown section for pipeline cards */
+
+export type PipelineCardButtonExtensions = {
+  refresh: boolean;
+  log: boolean;
+  history: boolean;
+  artifacts: boolean;
+  external: boolean;
+};
+
+export type IPipelineCardsColorTheme = {
+  primary: string;
+  secondary: string;
+  buttonsA: string;
+  buttonsB: string;
+};

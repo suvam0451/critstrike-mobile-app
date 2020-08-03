@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+  useCallback,
+} from "react";
 import { View, StyleSheet, Button, Image, Linking, Alert } from "react-native";
 import * as Notifications from "expo-notifications";
 import {
@@ -47,6 +53,11 @@ import { IBuildCard } from "../types/app-types";
 import { ThemeColors } from "react-navigation";
 import { getColors, getLogo, getStatusColor } from "./PipelineThemes";
 import RestartPipeline from "../api/general_restart";
+import { ValueField } from "../components/Decorators";
+import {
+  basePipelineCardPrimaryData,
+  baseJobStatuses,
+} from "../utils/variables";
 
 interface IGitlabProgressCardProps {
   data: IBuildCard;
@@ -56,24 +67,15 @@ interface IGitlabProgressCardProps {
 export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   const [Status, setStatus] = useState("unknown");
   const [StatusColor, setStatusColor] = useState("red");
-  const [StatusText, setStatusText] = useState("unknown");
-  const [projectSlug, setProjectSlug] = useState("pending...");
   const [displayDetails, setDisplayDetails] = useState(false);
-  const [StartingTime, setStartingTime] = useState("loading...");
-  const [PipelineID, setPipelineID] = useState<number | undefined>(undefined);
-  const [IsTag, setIsTag] = useState<boolean | undefined>(undefined);
+
+  const isCollapsed = useRef(true);
+
   /** This ref is used while restarting the pipeline */
   const [RestartRef, setRestartRef] = useState<number>(-1);
-  const [PrimaryData, setPrimaryData] = useState<GitlabCIPrimaryData>({
-    status: "unknown",
-    ref: "loading...",
-    pipelineID: undefined,
-    startingTime: "loading...",
-    isTag: undefined,
-    projName: "loading...",
-    projID: "loading...",
-    external_link: null,
-  });
+  const [PrimaryData, setPrimaryData] = useState<GitlabCIPrimaryData>(
+    basePipelineCardPrimaryData
+  );
   const [ColorTheme, setColorTheme] = useState({
     primary: "",
     secondary: "",
@@ -81,19 +83,27 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
     buttonsB: "",
   });
 
+  /** Sets which buttons are accessible for a pipeline card. */
+  const [PipelineAttributes, setPipelineAttributes] = useState({
+    refresh: true,
+    log: true,
+    history: true,
+    artifacts: true,
+    external: true,
+  });
+
   // Sets color of artifacts button
   const [ArtifactAccessible, setArtifactAccessible] = useState(false);
+
+  // State for second button
   const [FormAccessible, setFormAccessible] = useState(false);
 
   const { getAPIKey, addAPIKey } = useContext(AuthContext);
   const [RunningJobs, setRunningJobs] = useState<number>(0);
-  const [JobStatuses, setJobStatuses] = useState<JobCollectiveStatus>({
-    numSucceed: 0,
-    numFailed: 0,
-    numCanceled: 0,
-    numPending: 0,
-    numTotal: 0,
-  });
+  // Stored data about number of running/failed/succeeded pipeline jobs
+  const [JobStatuses, setJobStatuses] = useState<JobCollectiveStatus>(
+    baseJobStatuses
+  );
   const [AvatarImage, setAvatarImage] = useState<any>(null);
 
   let buttonStyles = {
@@ -107,21 +117,31 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
     backgroundColor: "transparent",
   };
 
+  // Only runs on the first load
+  const [IsInitializing, setIsInitializing] = useState(true);
+
   useEffect(() => {
-    // Update everything, On page start
-    ButtonPress(null);
+    if (IsInitializing) {
+      // Fetch all the pipeline states
+      ButtonPress(null);
 
-    // State update for cards
-    setColorTheme(getColors(props.provider));
-    setAvatarImage(getLogo(props.provider));
-    setStatusColor(getStatusColor(props.provider, Status));
+      // State update for cards
+      setColorTheme(getColors(props.provider));
+      setAvatarImage(getLogo(props.provider));
+      setStatusColor(getStatusColor(props.provider, Status));
 
-    PrimaryData.pipelineID ? setFormAccessible(false) : setFormAccessible(true);
+      PrimaryData.pipelineID
+        ? setFormAccessible(false)
+        : setFormAccessible(true);
+
+      // Finished first load
+      setIsInitializing(false);
+    }
 
     props.data.vars && props.data.vars.length > 0
       ? setFormAccessible(true)
       : setFormAccessible(false);
-  }, [Status, displayDetails]);
+  }, [displayDetails]);
 
   /** Requests a restart of a pipeline. */
   function restartPipeline(event: any): void {
@@ -251,18 +271,15 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             });
 
             Azure.getTimeline(params, id).then((res) => {
-              let A = _.filter(res.records, (ele) => ele.type == "Phase");
-              /** Assume job finished, if job was finalized */
-              let B = _.filter(
-                res.records,
-                (ele) => ele.name == "Finalize Job"
-              );
+              /** This query gives us approximate started jobs */
+              let A = res.records.filter((ele) => ele.type == "Phase");
+              /** This query gives up approximate finished jobs */
+              let B = res.records.filter((ele) => ele.name == "Finalize Job");
 
               setJobStatuses({
+                ...baseJobStatuses,
                 numSucceed: B.length,
                 numFailed: A.length - B.length,
-                numCanceled: 0,
-                numPending: 0,
                 numTotal: A.length,
               });
             });
@@ -336,6 +353,7 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
                 name="md-arrow-down"
                 onPress={() => {
                   setDisplayDetails(!displayDetails);
+                  // isCollapsed.current = false;
                 }}
               />
             </View>
@@ -432,27 +450,6 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
             </View>
           </View>
         </View>
-      </View>
-    </View>
-  );
-}
-
-interface IValueFieldProps {
-  maxwidth: number;
-  label: string;
-  value: string | number;
-}
-
-function ValueField(props: IValueFieldProps) {
-  return (
-    <View style={{ maxWidth: props.maxwidth }}>
-      <View style={styles.field}>
-        <Text accessibilityStates={[]} style={{ flex: 1, fontWeight: "bold" }}>
-          {props.label}:{" "}
-        </Text>
-        <Text accessibilityStates={[]} style={{ flex: 1 }}>
-          {props.value}
-        </Text>
       </View>
     </View>
   );

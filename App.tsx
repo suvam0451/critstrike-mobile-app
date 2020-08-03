@@ -147,12 +147,14 @@ export default function App(props: IAppProps) {
   const Drawer = createDrawerNavigator();
 
   const keystoreUpdateRequest = () => {};
+
+  /** useMemo makes sure the objects (and not the function itself),
+   *  is saved from reference equality failure
+   */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const authContext = useMemo(
     () => ({
       signIn: async (userName: string, password: string) => {
-        console.log("Called!!!");
-
         let userToken = "reality";
         setUserToken("-CUasfvMePjsZzEgBHw-");
         setIsLoading(false);

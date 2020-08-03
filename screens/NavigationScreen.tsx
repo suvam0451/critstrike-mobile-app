@@ -63,7 +63,7 @@ export function HomeScreenTabs() {
 const HomeScreen = (props: IProps) => {
   return (
     <View>
-      <Text>Konni Fucking Chiwa !!!</Text>
+      <Text>Welcome screen</Text>
       <Button
         title="View all pipelines"
         onPress={() => {

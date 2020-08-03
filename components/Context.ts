@@ -7,6 +7,7 @@ export interface IAuthContext {
   addAPIKey: any | null;
   getAPIKey: any | null;
 }
+/** */
 export const AuthContext = React.createContext<IAuthContext>({
   signIn: null,
   signOut: null,
