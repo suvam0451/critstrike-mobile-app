@@ -1,9 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
-// import Screen from "./Screen";
-import {
-  StackActionHelpers,
-  NavigationContainer,
-} from "@react-navigation/native";
+import React, { useEffect, useState, useRef, useReducer, Reducer } from "react";
 import { View, Text, Button, FlatList } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { GitlabProgressCard } from "../components/PipelineCards";
@@ -15,7 +10,17 @@ import { PasswordStoreScreen } from "./APIKeysMenu";
 import { ProfileScreen } from "./ProfileScreen";
 import { IBuildCard } from "../types/app-types";
 import { PickerModal } from "../components/PickerModal";
-import { GitlabActiveProfileModal } from "../components/ModalLibrary";
+import {
+  GitlabActiveProfileModal,
+  HundredValueModal,
+  GitlabSelectProjectModal,
+} from "../components/ModalLibrary";
+import { GetBuildCards, SetBuildCards } from "../utils/appStorage";
+import {
+  pipelineCardReducer,
+  IPipelineCardAction,
+  IPipelineCardState,
+} from "../reducers/pipelineCardReducer";
 
 interface IProps {
   navigation: any;
@@ -64,10 +69,17 @@ export function HomeScreenTabs() {
 // PAGE COMPONENTS
 const HomeScreen = (props: IProps) => {
   const [ModalVisibility, setModalVisibility] = useState(false);
+  const [state, dispatch] = useReducer<
+    Reducer<IPipelineCardState, IPipelineCardAction>
+  >(pipelineCardReducer, []);
 
   return (
     <View>
-      <GitlabActiveProfileModal
+      {/* <GitlabActiveProfileModal
+        isVisible={ModalVisibility}
+        setIsVisible={setModalVisibility}
+      /> */}
+      <GitlabSelectProjectModal
         isVisible={ModalVisibility}
         setIsVisible={setModalVisibility}
       />
@@ -102,6 +114,14 @@ const HomeScreen = (props: IProps) => {
           setModalVisibility(true);
         }}
       />
+      <Button
+        title="Clear pipeline cards"
+        onPress={() => {
+          dispatch({
+            type: "clear",
+          });
+        }}
+      />
     </View>
   );
 };
@@ -114,46 +134,27 @@ interface IBuildMonitorProps {
 /** Has gitlab cards */
 const BuildMonitorScreen = (props: IBuildMonitorProps) => {
   const [IsLoading, setIsLoading] = useState(false);
-
-  async function retrieveTags() {
-    let yeetos = await AsyncStorage.getItem("buildcards");
-  }
-
-  async function depositTags() {
-    await AsyncStorage.setItem("buildcards", JSON.stringify(idArray));
-  }
-
-  useEffect(() => {
-    retrieveTags();
-    return () => {
-      depositTags();
-    };
-  }, []);
-
-  let idArray: IBuildCard[] = [
-    {
-      uid: 0,
-      provider: "gitlab",
-      id: 18627416,
-      token: "-CUasfvMePjsZzEgBHw-",
-    },
+  const [BuildCards, setBuildCards] = useState<IBuildCard[]>([
     {
       uid: 1,
       provider: "gitlab",
       id: 16273750,
       token: "-CUasfvMePjsZzEgBHw-",
+      slug: "sleeping-forest-ue4",
     },
     {
       uid: 2,
       provider: "gitlab",
       id: 14775312,
       token: "-CUasfvMePjsZzEgBHw-",
+      slug: "website-ts-main",
     },
     {
       uid: 3,
       provider: "gitlab",
       id: 19639484,
       token: "-CUasfvMePjsZzEgBHw-",
+      slug: "critstrike-app-private",
     },
     {
       uid: 4,
@@ -196,14 +197,30 @@ const BuildMonitorScreen = (props: IBuildMonitorProps) => {
       id: 19639484,
       token: "-CUasfvMePjsZzEgBHw-",
     },
-  ];
+  ]);
+
+  function retrieveTags() {
+    GetBuildCards().then(
+      (res) => {
+        console.log(res.length);
+        setBuildCards(BuildCards.concat(res));
+      },
+      (err) => {
+        console.log("Key not found", err);
+      }
+    );
+  }
+
+  useEffect(() => {
+    retrieveTags();
+  }, []);
 
   function RefreshList() {}
 
   return (
     <View>
       <FlatList
-        data={idArray}
+        data={BuildCards}
         renderItem={(ele) => {
           return (
             <GitlabProgressCard data={ele.item} provider={ele.item.provider} />

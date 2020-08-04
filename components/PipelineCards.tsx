@@ -109,6 +109,9 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   );
   const [AvatarImage, setAvatarImage] = useState<any>(null);
 
+  // Indicates whether a project has pipeline support
+  const [PipelineSupport, setPipelineSupport] = useState<boolean>(true);
+
   let buttonStyles = {
     size: 24,
     backgroundColor: "transparent",
@@ -124,14 +127,29 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
   const [IsInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
+    const { provider } = props;
     if (IsInitializing) {
+      if (props.data.provider === "gitlab") {
+        const { id, slug } = props.data;
+        setPrimaryData({
+          status: "unknown",
+          ref: "master",
+          pipelineID: -1,
+          startingTime: "",
+          isTag: false,
+          projName: slug,
+          projID: id,
+          external_link: null,
+        });
+      }
+
       // Fetch all the pipeline states
       ButtonPress(null);
 
       // State update for cards
-      setColorTheme(getColors(props.provider));
-      setAvatarImage(getLogo(props.provider));
-      setStatusColor(getStatusColor(props.provider, Status));
+      setColorTheme(getColors(provider));
+      setAvatarImage(getLogo(provider));
+      setStatusColor(getStatusColor(provider, Status));
 
       PrimaryData.pipelineID
         ? setFormAccessible(false)
@@ -175,20 +193,32 @@ export function GitlabProgressCard(props: IGitlabProgressCardProps) {
     switch (props.data.provider) {
       case "gitlab": {
         let { id: project_id, token } = props.data;
+        console.log(project_id, token);
 
         const { data, status } = await Gitlab.getProjectPipelines(
           token,
           project_id
         );
         if (status == 200) {
-          // Get pipeline status and jobs for the most recent pipeline_id
-          let _pipeline = await GetPipelineInfo(token, project_id, data[0].id);
-          let _jobs = await GetPipelineJobs(token, project_id, data[0].id);
+          // Skip for projects with no pipelines (This should have been filtered earlier)
+          if (data.length === 0) {
+            // The project PROBABLY doesn't have pipelines configured
+            setPipelineSupport(false);
+          } else {
+            // Get pipeline status and jobs for the most recent pipeline_id
+            let _pipeline = await GetPipelineInfo(
+              token,
+              project_id,
+              data[0].id
+            );
+            let _jobs = await GetPipelineJobs(token, project_id, data[0].id);
 
-          // Update state
-          setPrimaryData({ ..._pipeline });
-          setJobStatuses({ ..._jobs });
-          AsyncStorage.setItem("numCanceled", _jobs.numCanceled.toString());
+            // Update state
+            setPrimaryData({ ..._pipeline });
+            setJobStatuses({ ..._jobs });
+          }
+        } else {
+          console.log("Failure !!!");
         }
         break;
       }

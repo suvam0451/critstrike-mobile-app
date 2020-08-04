@@ -20,6 +20,11 @@ export type JobCollectiveStatus = {
   numTotal: number;
 };
 
+type IBuildCardCommon = {
+  slug: string;
+  project_url: string;
+};
+
 export type IBuildCard =
   | {
       provider: "gitlab";
@@ -27,6 +32,7 @@ export type IBuildCard =
       id: number;
       token: string;
       vars?: IVariable[];
+      slug: string;
     }
   | { provider: "azure"; uid: number; params: AzureParams; vars?: IVariable[] }
   | {

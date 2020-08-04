@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Modal, StyleSheet, View, Text, Picker, Button } from "react-native";
+import {
+  Modal,
+  StyleSheet,
+  View,
+  Text,
+  Picker,
+  Button,
+  ActivityIndicator,
+} from "react-native";
 import AntIcon from "react-native-vector-icons/AntDesign";
 import { TouchableOpacity } from "react-native";
 
@@ -7,20 +15,32 @@ interface IProps {
   visible: boolean;
   items: string[];
   title: string;
+  showActivityIndicator: boolean;
   onClose: () => void;
   onSelect: (value: string) => void;
   value?: string;
 }
 
 export function PickerModal(props: IProps) {
-  let { visible, items, title, onClose, onSelect, value } = props;
+  let {
+    visible,
+    items,
+    title,
+    onClose,
+    onSelect,
+    value,
+    showActivityIndicator,
+  } = props;
   const [PickerValue, setPickerValue] = useState(items[0]);
+  // User must have made the selection for it to be valid
+  const [UserHasInteracted, setUserHasInteracted] = useState(false);
 
   // Set initial value, if provided
   useEffect(() => {
     if (value) {
       setPickerValue(value);
     }
+    return () => {};
   }, [value]);
 
   const ICON_SIZE = 22;
@@ -46,18 +66,20 @@ export function PickerModal(props: IProps) {
               size={ICON_SIZE}
             />
           </View>
-
-          <Picker
-            selectedValue={PickerValue}
-            onValueChange={(e) => {
-              onClose();
-              setPickerValue(e);
-            }}
-          >
-            {items.map((elem) => (
-              <Picker.Item value={elem} label={elem} />
-            ))}
-          </Picker>
+          {showActivityIndicator ? (
+            <ActivityIndicator style={styles.statusIndicator} size="large" />
+          ) : (
+            <Picker
+              selectedValue={PickerValue}
+              onValueChange={(e) => {
+                setPickerValue(e);
+              }}
+            >
+              {items.map((elem) => (
+                <Picker.Item value={elem} label={elem} />
+              ))}
+            </Picker>
+          )}
         </View>
       </View>
     </Modal>
@@ -97,5 +119,11 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 18,
+  },
+  statusIndicator: {
+    marginHorizontal: "auto",
+    marginVertical: "auto",
+    display: "flex",
+    justifyContent: "center",
   },
 });

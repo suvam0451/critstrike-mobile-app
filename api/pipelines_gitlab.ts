@@ -65,14 +65,15 @@ export async function getPipeline(
 export async function restartPipeline(
   token: string,
   projId: number | string,
-  data: Object = { ref: "master" }
+  data: Object = { ref: "master" },
+  debug?: boolean
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     getGitlabInstance(token, "POST")
       .post(`projects/${projId}/pipeline`, data)
       .then(
-        (res) => console.log(res),
-        (err) => console.log(err)
+        (res) => (debug ? console.log(res) : true),
+        (err) => (debug ? console.log(err) : true)
       );
   });
 }
