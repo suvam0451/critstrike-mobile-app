@@ -1,4 +1,5 @@
-image: node:latest
+# NOTE: turtle-cli depends on yarn !!!
+image: ubuntu:latest
 
 cache: &global_cache
   key: ${CI_COMMIT_REF_SLUG}
@@ -15,23 +16,30 @@ BuildAPK:
   cache:
     <<: *global_cache
   script:
-    - yarn install --silent
-    - yarn global add sharp-cli expo-cli
-    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
-    - npx expo-optimize
-    # - npx expo build:android
-    - npx expo publish --non-interactive
-
-PublishAPK:
-  stage: build
-  cache:
-    <<: *global_cache
-  script:
-    - yarn install --silent
-    - yarn global add sharp-cli expo-cli
-    - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
-    - npx expo-optimize
-    # - npx expo build:android
-    - npx expo publish --non-interactive
-  only:
-    - tags
+    # - sudo dnf install -y nodejs nodejs-yarn java-1.8.0-openjdk make vips # LTS-14.17.0
+    - apt update && apt upgrade
+    - apt install -y curl libvips-dev make openjdk-8-jdk
+    - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+    - apt install -y nodejs
+    - npm install --global yarn
+    - npm install
+    - npx turtle setup:android && yarn turtle build:android # staging
+    # - npx expo-optimize && npx expo build:android # testing
+    # - npx expo publish --non-interactive
+  artifacts:
+    paths:
+      - .
+    expire_in: 1 week
+# PublishAPK:
+#   stage: build
+#   cache:
+#     <<: *global_cache
+#   script:
+#     - yarn install --silent
+#     - yarn global add sharp-cli expo-cli
+#     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
+#     - npx expo-optimize
+#     # - npx expo build:android
+#     - npx expo publish --non-interactive
+#   only:
+#     - tags
