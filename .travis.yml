@@ -1,0 +1,178 @@
+language: java
+
+env:
+  global:
+    - EXPO_SDK_VERSION="41.0.0"
+    - NODE_VERSION="14.17.0" # LTS
+    - KEYSTORE_FILE="./@suvam0451__SampleApp.bak.jks"
+    - ANDROID_KEYSTORE_ALIAS="QHN1dmFtMDQ1MS9TYW1wbGVBcHA="
+
+jobs:
+  include:
+    #  --------------------------- TESTING -------------------------------
+    # staging -> default channel
+    - stage: staging -> default
+      if: branch = develop
+      env:
+        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/yarn_cache
+      install:
+        - nvm install $NODE_VERSION
+        - nvm use $NODE_VERSION
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      before_install:
+        - yarn global add expo-cli
+      script:
+        - yarn --silent
+        # - yarn expo-optimize
+        - expo build:android --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+
+    #  --------------------------- STAGING -------------------------------
+    # staging -> channel A
+    - stage: staging -> channel A
+      if: branch = publish-channel-a # Disabled
+      env:
+        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/yarn_cache
+      install:
+        - nvm install $NODE_VERSION
+        - nvm use $NODE_VERSION
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      before_install:
+        - yarn global add expo-cli
+      script:
+        - yarn --silent
+        # - yarn expo-optimize
+        - expo publish --release-channel first --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+
+    # staging -> channel B
+    - stage: staging -> channel B
+      if: branch = publish-channel-b # Disabled
+      env:
+        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/yarn_cache
+      before_install:
+        - nvm install $NODE_VERSION
+        - nvm use $NODE_VERSION
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      install:
+        - yarn global add expo-cli
+      script:
+        - yarn --silent
+        # - yarn expo-optimize
+        - expo publish --release-channel second --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+
+    #  ------------------------ PRODUCTION ----------------------------
+    # package | apk
+    - stage: package | apk
+      jdk: openjdk8
+      env:
+        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/.turtle
+          - $HOME/yarn_cache
+          - $HOME/.gradle/wrapper
+      before_install:
+        - nvm install $NODE_VERSION
+        - nvm use $NODE_VERSION
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      install:
+        # - pip install --user awscli
+        - yarn global add expo-cli turtle-cli
+      script:
+        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
+        - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+        - turtle build:android --type apk -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+      # after_success:
+      # TODO: Upload to cloud bucket
+
+    # package | app-bundle
+    - stage: package | app-bundle
+      jdk: openjdk8
+      env:
+        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/.turtle
+          - $HOME/yarn_cache
+          - $HOME/.gradle/wrapper
+      before_install:
+        - nvm install $NODE_VERSION
+        - nvm use $NODE_VERSION
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      install:
+        # - pip install --user awscli
+        - yarn global add expo-cli turtle-cli
+      script:
+        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
+        - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+        - turtle build:android --type app-bundle -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+      # after_success:
+      # TODO: Upload to cloud bucket
+
+    # package | ios-simulator
+    - stage: package | ios-simulator
+      if: branch = apple # Disabled
+      os: osx
+      osx_image: xcode11.2
+      language: node_js
+      node_js: $NODE_VERSION
+      env:
+        - CACHE_NAME=build-ios-simulator YARN_CACHE_FOLDER="/Users/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/.turtle
+          - $HOME/yarn_cache
+      before_install:
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      install:
+        # - pip install --user awscli
+        - yarn global add turtle-cli expo-cli
+      script:
+        - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.tar.gz"
+        - turtle setup:ios --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+        - turtle build:ios # --team-id $EXPO_APPLE_TEAM_ID --type simulator -o $ARTIFACT_PATH
+      # after_success:
+      # TODO: Upload to cloud bucket
+
+    # package | ios-ipa
+    - stage: package | ios-ipa
+      if: branch = apple # Disabled
+      os: osx
+      osx_image: xcode11.2
+      language: node_js
+      node_js: $NODE_VERSION
+      env:
+        - CACHE_NAME=build-ios-ipa YARN_CACHE_FOLDER="/Users/travis/yarn_cache"
+      cache:
+        directories:
+          - $HOME/.turtle
+          - $HOME/yarn_cache
+      before_install:
+        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
+        - export PATH="$HOME/.yarn/bin:$PATH"
+      install:
+        # - pip install --user awscli
+        - yarn global add turtle-cli expo-cli
+      script:
+        - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.ipa"
+        - turtle setup:ios --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+        - turtle build:ios # --team-id $EXPO_APPLE_TEAM_ID -o $ARTIFACT_PATH
+      # after_success:
+      # TODO: Upload to cloud bucket
+
+      #  ------------------------ DEPLOYMENT ----------------------------
+      # TODO: Either incorporate with production, or split

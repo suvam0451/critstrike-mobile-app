@@ -1,45 +1,115 @@
 # NOTE: turtle-cli depends on yarn !!!
 image: ubuntu:latest
 
-cache: &global_cache
+cache: &node_cache
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - node_modules/
   policy: pull-push
 
+cache: &gradle_cache
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - $HOME/.turtle
+    - $HOME/yarn_cache
+    - $HOME/.gradle/wrapper
+  policy: pull-push
+
 stages:
   - build
   - publish
+  - deploy
 
-BuildAPK:
-  stage: build
+variables:
+  EXPO_SDK_VERSION: "41.0.0" # Expo version 
+  KEYSTORE_FILE: "./@suvam0451__SampleApp.bak.jks"
+  ANDROID_KEYSTORE_ALIAS: "QHN1dmFtMDQ1MS9TYW1wbGVBcHA="
+  # EXPO_USER: "suvam0451"
+
+#  --------------------------- TESTING -------------------------------
+# staging -> default channel
+PublishDefault:
+  stage: publish
+  image: node:lts-alpine3.13
   cache:
-    <<: *global_cache
+    <<: *node_cache
+  script:
+    - apk add libvorbis vips python3 build-base
+    - yarn global add expo-cli && yarn
+    # - yarn expo-optimize
+    - expo login -u suvam0451 -p Svm443re --non-interactive
+    - yarn expo publish
+  # only:
+  #   - develop
+
+#  --------------------------- STAGING -------------------------------
+# staging -> channel A
+PublishChannelA:
+  stage: publish
+  image: node:lts-alpine3.13
+  cache:
+    <<: *node_cache
+  script:
+    - apk add libvorbis vips python3 build-base
+    - yarn global add expo-cli && yarn
+    # - yarn expo-optimize
+    - expo login -u suvam0451 -p Svm443re --non-interactive
+    - expo publish --release-channel first
+  # only:
+  #   - publish-channel-a # Disabled
+
+# staging -> channel B
+PublishChannelB:
+  stage: publish
+  image: node:lts-alpine3.13
+  cache:
+    <<: *node_cache
+  script:
+    - apk add libvorbis vips python3 build-base
+    - yarn global add expo-cli && yarn
+    # - yarn expo-optimize
+    - expo login -u suvam0451 -p Svm443re --non-interactive
+    - yarn expo publish --release-channel second
+  # only:
+  #   - publish-channel-b # Disabled
+
+#  ------------------------ PRODUCTION ----------------------------
+# package | apk
+PackageApk:
+  stage: publish
+  cache:
+    <<: *node_cache
+    <<: *gradle_cache
   script:
     # - sudo dnf install -y nodejs nodejs-yarn java-1.8.0-openjdk make vips # LTS-14.17.0
-    - apt update && apt upgrade
-    - apt install -y curl libvips-dev make openjdk-8-jdk
+    - apt update && apt install -y curl libvips-dev make openjdk-8-jdk
     - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
     - apt install -y nodejs
     - npm install --global yarn
-    - npm install
-    - npx turtle setup:android && yarn turtle build:android # staging
-    # - npx expo-optimize && npx expo build:android # testing
-    # - npx expo publish --non-interactive
+    - yarn global add turtle-cli
+    - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+    - turtle build:android --type apk --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
   artifacts:
     paths:
-      - .
+      - $HOME/expo-apps/*
     expire_in: 1 week
-# PublishAPK:
-#   stage: build
-#   cache:
-#     <<: *global_cache
-#   script:
-#     - yarn install --silent
-#     - yarn global add sharp-cli expo-cli
-#     - npx expo login -u $EXPO_USERNAME -p $EXPO_PASSWORD
-#     - npx expo-optimize
-#     # - npx expo build:android
-#     - npx expo publish --non-interactive
-#   only:
-#     - tags
+
+# package | app-bundle
+PackageAppBundle:
+  stage: publish
+  cache:
+    <<: *node_cache
+    <<: *gradle_cache
+  script:
+    # - sudo dnf install -y nodejs nodejs-yarn java-1.8.0-openjdk make vips # LTS-14.17.0
+    - apt update && apt install -y curl libvips-dev make openjdk-8-jdk
+    - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+    - apt install -y nodejs
+    - npm install --global yarn
+    - yarn global add turtle-cli
+    - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
+    - turtle build:android --type app-bundle --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+  artifacts:
+    paths:
+      - $HOME/expo-apps/*
+    expire_in: 1 week

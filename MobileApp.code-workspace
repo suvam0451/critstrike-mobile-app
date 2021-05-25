@@ -15,7 +15,8 @@
       "node_modules": true,
       ".expo": true,
       "yarn.lock": true,
-      "yarn-error.log": true
+      "yarn-error.log": true,
+      ".expo-shared": true
     }
   }
 }
