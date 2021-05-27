@@ -28,8 +28,8 @@ jobs:
         - yarn global add expo-cli
       script:
         - yarn --silent
-        # - yarn expo-optimize
-        - expo build:android --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - expo-optimize
+        - expo publish --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
 
     #  --------------------------- STAGING -------------------------------
     # staging -> channel A
@@ -101,6 +101,7 @@ jobs:
 
     # package | app-bundle
     - stage: package | app-bundle
+      if: branch = build-bundle
       jdk: openjdk8
       env:
         - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
