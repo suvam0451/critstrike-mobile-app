@@ -6,6 +6,7 @@ env:
     - NODE_VERSION="14.17.0" # LTS
     - KEYSTORE_FILE="./@suvam0451__SampleApp.bak.jks"
     - ANDROID_KEYSTORE_ALIAS="QHN1dmFtMDQ1MS9TYW1wbGVBcHA="
+    # - $AWS_BUCKET_ID 
 
 jobs:
   include:
@@ -18,12 +19,12 @@ jobs:
       cache:
         directories:
           - $HOME/yarn_cache
-      install:
+      before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
         - export PATH="$HOME/.yarn/bin:$PATH"
-      before_install:
+      install:
         - yarn global add expo-cli
       script:
         - yarn --silent
@@ -39,16 +40,16 @@ jobs:
       cache:
         directories:
           - $HOME/yarn_cache
-      install:
+      before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
         - export PATH="$HOME/.yarn/bin:$PATH"
-      before_install:
+      install:
         - yarn global add expo-cli
       script:
         - yarn --silent
-        # - yarn expo-optimize
+        - expo-optimize
         - expo publish --release-channel first --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
 
     # staging -> channel B
@@ -68,8 +69,9 @@ jobs:
         - yarn global add expo-cli
       script:
         - yarn --silent
-        # - yarn expo-optimize
+        - expo-optimize
         - expo publish --release-channel second --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+  
 
     #  ------------------------ PRODUCTION ----------------------------
     # package | apk
@@ -88,14 +90,14 @@ jobs:
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
-        # - pip install --user awscli
+        - pip install --user awscli
         - yarn global add expo-cli turtle-cli
       script:
         - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
         - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
         - turtle build:android --type apk -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
-      # after_success:
-      # TODO: Upload to cloud bucket
+      after_success:
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
     # package | app-bundle
     - stage: package | app-bundle
@@ -113,14 +115,14 @@ jobs:
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
-        # - pip install --user awscli
+        - pip install --user awscli
         - yarn global add expo-cli turtle-cli
       script:
-        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
+        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.aab"
         - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
         - turtle build:android --type app-bundle -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
-      # after_success:
-      # TODO: Upload to cloud bucket
+      after_success:
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
     # package | ios-simulator
     - stage: package | ios-simulator
@@ -139,14 +141,14 @@ jobs:
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
-        # - pip install --user awscli
+        - pip install --user awscli
         - yarn global add turtle-cli expo-cli
       script:
         - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.tar.gz"
         - turtle setup:ios --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
         - turtle build:ios # --team-id $EXPO_APPLE_TEAM_ID --type simulator -o $ARTIFACT_PATH
-      # after_success:
-      # TODO: Upload to cloud bucket
+      after_success:
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
     # package | ios-ipa
     - stage: package | ios-ipa
@@ -165,14 +167,14 @@ jobs:
         - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
-        # - pip install --user awscli
+        - pip install --user awscli
         - yarn global add turtle-cli expo-cli
       script:
         - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.ipa"
         - turtle setup:ios --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
         - turtle build:ios # --team-id $EXPO_APPLE_TEAM_ID -o $ARTIFACT_PATH
-      # after_success:
-      # TODO: Upload to cloud bucket
+      after_success:
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
       #  ------------------------ DEPLOYMENT ----------------------------
       # TODO: Either incorporate with production, or split
