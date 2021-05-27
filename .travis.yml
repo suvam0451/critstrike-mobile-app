@@ -4,16 +4,16 @@ env:
   global:
     - EXPO_SDK_VERSION="41.0.0"
     - NODE_VERSION="14.17.0" # LTS
-    - KEYSTORE_FILE="./@suvam0451__SampleApp.bak.jks"
+    - KEYSTORE_FILE_PATH="./@suvam0451__SampleApp.bak.jks"
     - ANDROID_KEYSTORE_ALIAS="QHN1dmFtMDQ1MS9TYW1wbGVBcHA="
-    # - $AWS_BUCKET_ID 
+    # - $AWS_BUCKET_ID
 
 jobs:
   include:
     #  --------------------------- TESTING -------------------------------
     # staging -> default channel
     - stage: staging -> default
-      if: branch = develop
+      if: branch = (monkey|develop)
       env:
         - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
       cache:
@@ -29,7 +29,7 @@ jobs:
       script:
         - yarn --silent
         - expo-optimize
-        - expo build:android -t apk --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - expo build:android -t apk --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS --no-wait
 
     #  --------------------------- STAGING -------------------------------
     # staging -> channel A
@@ -49,8 +49,8 @@ jobs:
         - yarn global add expo-cli expo-optimize
       script:
         - yarn --silent
-        - expo-optimize 
-        - expo publish --release-channel first --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - expo-optimize
+        - expo publish --release-channel first --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
 
     # staging -> channel B
     - stage: staging -> channel B
@@ -70,12 +70,12 @@ jobs:
       script:
         - yarn --silent
         - expo-optimize
-        - expo publish --release-channel second --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
-  
+        - expo publish --release-channel second --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
 
     #  ------------------------ PRODUCTION ----------------------------
     # package | apk
     - stage: package | apk
+      if: branch = apple
       jdk: openjdk8
       env:
         - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
@@ -95,7 +95,7 @@ jobs:
       script:
         - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
         - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
-        - turtle build:android --type apk -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - turtle build:android --type apk -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
       after_success:
         - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
@@ -121,7 +121,7 @@ jobs:
       script:
         - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.aab"
         - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
-        - turtle build:android --type app-bundle -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - turtle build:android --type app-bundle -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
       after_success:
         - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
 
