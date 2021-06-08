@@ -84,7 +84,7 @@ jobs:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
       install:
-        - pip install --user awscli
+        - pip3 install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
       script:
         - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
@@ -108,7 +108,7 @@ jobs:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
       install:
-        - pip install --user awscli
+        - pip3 install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
       script:
         - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.aab"
@@ -133,7 +133,7 @@ jobs:
       before_install:
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
-        - pip install --user awscli
+        - pip3 install --user awscli
         - yarn global add turtle-cli expo-cli expo-optimize
       script:
         - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.tar.gz"
@@ -156,7 +156,7 @@ jobs:
           - $HOME/.turtle
           - $HOME/yarn_cache
       install:
-        - pip install --user awscli
+        - pip3 install --user awscli
         - yarn global add turtle-cli expo-cli expo-optimize
       script:
         - export ARTIFACT_PATH="/Users/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.ipa"
