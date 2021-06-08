@@ -70,7 +70,7 @@ jobs:
 
     #  ------------------------ PRODUCTION ----------------------------
     # package | apk
-    - stage: package | apk
+    - stage: package | android
       if: branch = develop
       jdk: openjdk8
       env:
@@ -89,35 +89,16 @@ jobs:
         - pip install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
       script:
-        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.apk"
+        - export APK_ARTIFACT_FILENAME="willow-apk-$TRAVIS_COMMIT.apk"
+        - export APPBUNDLE_ARTIFACT_FILENAME="willow-apk-$TRAVIS_COMMIT.apk"
+        - export APK_ARTIFACT_PATH="/home/travis/$APK_ARTIFACT_FILENAME"
+        - export APPBUNDLE_ARTIFACT_PATH="/home/travis/$APPBUNDLE_ARTIFACT_FILENAME"
         - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
         - turtle build:android --type apk -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
+        - turtle build:android --type app-bundle -o $APPBUNDLE_ARTIFACT_PATH --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
       after_success:
-        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
-
-    # package | app-bundle
-    - stage: package | app-bundle
-      if: branch = develop
-      jdk: openjdk8
-      env:
-        - CACHE_NAME=publish YARN_CACHE_FOLDER="/home/travis/yarn_cache"
-      cache:
-        directories:
-          - $HOME/.turtle
-          - $HOME/yarn_cache
-          - $HOME/.gradle/wrapper
-      before_install:
-        - nvm install $NODE_VERSION
-        - nvm use $NODE_VERSION
-      install:
-        - pip3 install --user awscli
-        - yarn global add expo-cli turtle-cli expo-optimize
-      script:
-        - export ARTIFACT_PATH="/home/travis/expo-project-$TRAVIS_COMMIT-`date +%s`.aab"
-        - turtle setup:android --sdk-version $EXPO_SDK_VERSION || travis_terminate 1
-        - turtle build:android --type app-bundle -o $ARTIFACT_PATH --keystore-path $KEYSTORE_FILE_PATH --keystore-alias $ANDROID_KEYSTORE_ALIAS
-      after_success:
-        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/TVSD/Mobile/$ARTIFACT_PATH
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/artha/apk/$APK_ARTIFACT_FILENAME"
+        - aws s3 cp $ARTIFACT_PATH s3://$AWS_BUCKET_ID/artha/app-bundle/$APPBUNDLE_ARTIFACT_FILENAME"
 
     # package | ios-simulator
     - stage: package | ios-simulator
