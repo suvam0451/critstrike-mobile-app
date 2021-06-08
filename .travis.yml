@@ -22,8 +22,6 @@ jobs:
       before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
-        - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - yarn global add expo-cli expo-optimize
       script:
@@ -43,8 +41,6 @@ jobs:
       before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
-        - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - yarn global add expo-cli expo-optimize
       script:
@@ -87,8 +83,6 @@ jobs:
       before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
-        - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - pip install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
@@ -113,8 +107,6 @@ jobs:
       before_install:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s --
-        - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - pip install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
@@ -139,7 +131,6 @@ jobs:
           - $HOME/.turtle
           - $HOME/yarn_cache
       before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
         - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - pip install --user awscli
@@ -164,9 +155,6 @@ jobs:
         directories:
           - $HOME/.turtle
           - $HOME/yarn_cache
-      before_install:
-        - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version $YARN_VERSION
-        - export PATH="$HOME/.yarn/bin:$PATH"
       install:
         - pip install --user awscli
         - yarn global add turtle-cli expo-cli expo-optimize
