@@ -84,6 +84,9 @@ jobs:
         - nvm install $NODE_VERSION
         - nvm use $NODE_VERSION
       install:
+        - add-apt-repository ppa:deadsnakes/ppa
+        - apt-get update
+        - apt-get -y install python3.8 python3-pip
         - pip3 install --user awscli
         - yarn global add expo-cli turtle-cli expo-optimize
       script:
