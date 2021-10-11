@@ -1,7 +1,6 @@
 {
   "expo": {
     "name": "Critstrike",
-    "sdkVersion": "38.0.0",
     "slug": "SampleApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,7 +18,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "favicon": "./assets/images/favicon.png"
     },

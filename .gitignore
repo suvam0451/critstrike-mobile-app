@@ -6,3 +6,6 @@ yarn.lock
 
 .expo/
 yarn-error.log
+
+# google
+google-services.json
